@@ -4,7 +4,7 @@ A lightweight but powerful network library with simplified and expressive syntax
 
 The prefix `XM` is the abbreviation of our team [Xcode-Men](http://www.jianshu.com/users/d509cc369c78/).
 
-![](https://img.shields.io/badge/platform-iOS-red.svg) ![](https://img.shields.io/badge/language-Objective--C-orange.svg) ![](https://img.shields.io/badge/pod-v1.0.0-blue.svg) ![](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat) ![](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)
+![Platform](https://img.shields.io/badge/platform-iOS-red.svg) ![Language](https://img.shields.io/badge/language-Objective--C-orange.svg) [![CocoaPods](https://img.shields.io/badge/pod-v1.0.0-blue.svg)](http://cocoadocs.org/docsets/XMNetworking/) [![Carthage](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE)
 
 ![](http://img.kangzubin.cn/xmnetworking/XMNetworking.png) 
 
@@ -23,7 +23,7 @@ The prefix `XM` is the abbreviation of our team [Xcode-Men](http://www.jianshu.c
 
 ## Installation
 
-* **CocoaPods**
+### CocoaPods
 
 Add the following line to you `Podfile`, and then run `pod install` or `pod update`. 
 
@@ -33,7 +33,7 @@ pod 'XMNetworking'
 
 **NOTE:** The `XMNetworking` has contained `AFNetworking` source code with version `3.1.0`, and you **should NOT** add `pod AFNetworking` to your `Podfile`.
 
-* **Carthage** (Supported only iOS 8+)
+### Carthage (Supported only iOS 8+)
 
 [Carthage](https://github.com/Carthage/Carthage) is a decentralized dependency manager that builds your dependencies and provides you with binary frameworks.
 
@@ -54,7 +54,7 @@ Run `carthage update --platform ios` to build the framework and drag the built `
 
 **NOTE:** The `XMNetworking.framework` has contained `AFNetworking` source code with version `3.1.0`, and you **should NOT** add `AFNetworking.framework` to your Xcode project.
 
-* **Manually**
+### Manually
 
 Download all the files in the `XMNetworking` *subdirectory*, then add the source files to your Xcode project.
 
@@ -350,9 +350,9 @@ There is a `AFHTTPSessionManager` object exposed in `XMEngine` named `sessionMan
 
 See also `AFSecurityPolicy` on `AFNetworking` for more details.
 
-## Demo
+## Documents
 
-There are several test demo samples in `ViewController.m`, see the file for details.
+See [XMNetworking Documents Link](http://cocoadocs.org/docsets/XMNetworking/).
 
 ## Architecture
 
@@ -378,5 +378,4 @@ The soure code files for XMNetworking is compact and concise, there are only fou
 
 ## License
 XMNetworking is released under the MIT license. See [LICENSE](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE) for details.
-
 
