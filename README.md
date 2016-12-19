@@ -2,19 +2,25 @@
 
 A lightweight but powerful network library with simplified and expressive syntax based on AFNetworking.
 
-The prefix `XM` is the abbreviation of our team [Xcode-Men](http://www.jianshu.com/users/d509cc369c78/).
+The prefix `XM` is the abbreviation of our team [Xcode-Men](http://www.jianshu.com/users/d509cc369c78/). [中文文档](https://github.com/kangzubin/XMNetworking/blob/master/README_CN.md)
 
 ![Platform](https://img.shields.io/badge/platform-iOS-red.svg) ![Language](https://img.shields.io/badge/language-Objective--C-orange.svg) [![CocoaPods](https://img.shields.io/badge/pod-v1.0.0-blue.svg)](http://cocoadocs.org/docsets/XMNetworking/) [![Carthage](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE)
 
+## Introduction
+
 ![](http://img.kangzubin.cn/xmnetworking/XMNetworking.png) 
+
+As shown in the picture above, the XMNetworking is designed with centralization thought, all the XMRequest objects are launched and managed by XMCenter, and you could modify the callback dispatch queue and general information such as server url, header and parameter for all request through XMCenter, as well as provide a custom processing block for response data, in which you could deal with model transformation, business error code checking, network cache and so on. Futhermore, in order to switch to other network library easily or implement the underlying logic by ourself in the future, we add a XMEngine layer to insulate the dependence of third party network library like AFNetworking.
 
 ## Features
 
-* Simply and Easily to use
-* Powerful API for almost all network reqeust usage scenarios
-* Suitable for RESTful Server API
-* Supporting Batch and Chain requests
-* Network Rachability checking and Security Policy based on AFNetworking
+* Simply and easily to use.
+* Powerful functions for all network reqeust usage scenarios (Normal/Upload/Download).
+* Designed for RESTful Server API, and providing various serialization type.
+* Supporting Batch and Chain requests.
+* Cancelable for running request and auto retrying for fail request.
+* Global configuration for genneral info and custom respnose processing block.
+* Network reachability checking and security policy based on AFNetworking.
 
 ## Requirements
 
@@ -25,13 +31,13 @@ The prefix `XM` is the abbreviation of our team [Xcode-Men](http://www.jianshu.c
 
 ### CocoaPods
 
-Add the following line to you `Podfile`, and then run `pod install` or `pod update`. 
+Add the following line to your `Podfile`, and then run `pod install` or `pod update`. 
 
 ```bash
 pod 'XMNetworking'
 ```
 
-**NOTE:** The `XMNetworking` has contained `AFNetworking` source code with version `3.1.0`, and you **should NOT** add `pod AFNetworking` to your `Podfile`.
+**NOTE:** The `XMNetworking` has contained `AFNetworking` source code with version `3.1.0`, and you **should NOT** add `pod AFNetworking` to your `Podfile` to avoid conflict.
 
 ### Carthage (Supported only iOS 8+)
 
@@ -52,7 +58,7 @@ github "kangzubin/XMNetworking"
 
 Run `carthage update --platform ios` to build the framework and drag the built `XMNetworking.framework` into your Xcode project.
 
-**NOTE:** The `XMNetworking.framework` has contained `AFNetworking` source code with version `3.1.0`, and you **should NOT** add `AFNetworking.framework` to your Xcode project.
+**NOTE:** The `XMNetworking.framework` has contained `AFNetworking` source code with version `3.1.0`, and you **should NOT** add `AFNetworking.framework` to your Xcode project to avoid conflict.
 
 ### Manually
 
@@ -124,7 +130,9 @@ And you could modify the general headers and parameters for XMCenter by followin
    NSLog(@"onFinished");
 }];
 ```
-**NOTE1:** The following two usages to set URL for request are both ok, but when the `server`, `api` and `url` are assigned for a request object at the same time，the value of `url` is used, while the `server` and `api` will be ignored.
+
+**NOTE1:** The following two usages to set URL for request are both ok, but when the `server`, `api` and `url` are assigned for a request object at the same time, the value of `url` is used, while the `server` and `api` will be ignored.
+
 ```objc
 request.url = @"http://example.com/v1/foo/bar";
 ```
@@ -133,6 +141,7 @@ request.url = @"http://example.com/v1/foo/bar";
 request.server = @"http://example.com/v1/";
 request.api = @"foo/bar";
 ```
+
 **NOTE2:** The callback blocks (success/failure/finished/progress) are optional for a request object and there are several methods with different block arguments in XMCenter to send requests. The success/faillure/finished blocks are called on `callbackQueue` of XMCenter, **while the progress block is called on the session queue**, not the `callbackQueue` of XMCenter !!!
 
 #### POST
@@ -303,7 +312,7 @@ The `[XMCenter sendChainRequest:...]` method return the new running `XMChainRequ
 
 ### Cancel the Running Request
 
-When you invoke [XMCenter sendRequest:...] to send a network reqeust, the method will return a unique identifier for the new running `XMRequest` object (`0` for fail), you could save the identifier value, and then cancel the running  request by identifier for your business logic later if need.
+When you invoke `[XMCenter sendRequest:...]` to send a network reqeust, the method will return a unique identifier for the new running `XMRequest` object (`0` for fail), you could save the identifier value, and then cancel the running  request by identifier for your business logic later if need. If a request has already finished, and your still use its identifier to cancel the request, the action will be ignored directly.
 
 ```objc
 // send a request
@@ -330,10 +339,13 @@ sleep(2);
 ### Network Reachability
 There are two ways to get the network reachability:
 ```objc
-[XMCenter isNetworkReachable]; // Return a bool value to comfirm whether network is reachable or not.
+[XMCenter isNetworkReachable]; 
+// Return a bool value to comfirm whether network is reachable or not.
 ```
+or
 ```objc
-[[XMEngine sharedEngine] networkReachability]; // Return the current network reachablity status, -1 to `Unknown`, 0 to `NotReachable, 1 to `WWAN` and 2 to `WiFi`	
+[[XMEngine sharedEngine] networkReachability]; 
+// Return the current network reachablity status, -1 to `Unknown`, 0 to `NotReachable, 1 to `WWAN` and 2 to `WiFi`	
 ```
 
 See also `AFNetworkReachabilityManager` for more details.
@@ -342,13 +354,13 @@ See also `AFNetworkReachabilityManager` for more details.
 
 Adding pinned SSL certificates to your app helps prevent man-in-the-middle attacks and other vulnerabilities. Conveniently, the `AFSecurityPolicy` module could help to evaluate server trust against pinned X.509 certificates and public keys over secure connections.
 
-There is a `AFHTTPSessionManager` object exposed in `XMEngine` named `sessionManager`, and you should firstly modify the `securityPolicy` mode for `sessionManager` to take SSL Pinning effective by following code, then add the `.cer` certificate file to your project.
+There is a `AFHTTPSessionManager` object exposed in `XMEngine` named `sessionManager`, and you should firstly modify the `securityPolicy` mode for `sessionManager` to take SSL Pinning effective by following code, then add the `.cer` certificate file or public key to your project.
 
 ```objc
 [XMEngine sharedEngine].sessionManager.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
 ```
 
-See also `AFSecurityPolicy` on `AFNetworking` for more details.
+See also `AFSecurityPolicy` for more details.
 
 ## Documents
 
@@ -356,17 +368,17 @@ See [XMNetworking Documents Link](http://cocoadocs.org/docsets/XMNetworking/).
 
 ## Architecture
 
-The soure code files for XMNetworking is compact and concise, there are only four core files in the library: The `XMConst.h` defines some const enums and blocks, and `XMRequest`, `XMCenter`, `XMEngine` are the declaration for core Class, the architecture of XMNetworking is as follwing:
+The soure code files for XMNetworking is compact and concise, there are only four core files in the library: The `XMConst.h` defines some const enums and blocks, and `XMRequest`, `XMCenter`, `XMEngine` are the declaration and implementation for core Class, the architecture of XMNetworking is as follwing:
 
 ![](http://img.kangzubin.cn/xmnetworking/XMNetworking-nodes.png)
 
 ## To Do List
 
-* Support for resume download
-* Support for network cache
-* Test Supporting for tvOS/watchOS/OS X
-* More powerful response data model transformation
-* Plugin mechanism to extend the XMNetworking
+* Support for resume download.
+* Support for network cache.
+* Test Supporting for tvOS/watchOS/OS X.
+* More powerful response data model transformation.
+* Plugin mechanism to extend the XMNetworking.
 
 ## Author
 
