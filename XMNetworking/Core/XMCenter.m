@@ -292,7 +292,7 @@
                   onFailure:nil
                  onFinished:^(id responseObject, NSError *error) {
                      __strong __typeof(weakSelf)strongSelf = weakSelf;
-                     [chainRequest onFinishedOneRequest:chainRequest.firstRequest response:responseObject error:error];
+                     [chainRequest onFinishedOneRequest:request response:responseObject error:error];
                      if (chainRequest.nextRequest) {
                          [strongSelf xm_sendChainRequest:chainRequest withRequest:chainRequest.nextRequest];
                      }
