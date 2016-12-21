@@ -386,7 +386,7 @@ The soure code files for XMNetworking is compact and concise, there are only fou
 
 ## Collaborators
 * [southpeak](https://github.com/southpeak)
-* [Xcoce-Men Team](http://www.jianshu.com/users/d509cc369c78/)
+* [Xcode-Men Team](http://www.jianshu.com/users/d509cc369c78/)
 
 ## License
 XMNetworking is released under the MIT license. See [LICENSE](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE) for details.

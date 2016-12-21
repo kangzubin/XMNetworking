@@ -150,7 +150,7 @@ request.api = @"foo/bar";
 
 ```objc
 [XMCenter sendRequest:^(XMRequest *request) {
-    //request.server = @"http://example.com/v1/"; // 可选，如果读取 XMCenter.generalServer
+    //request.server = @"http://example.com/v1/"; // 可选，如果为空则读取 XMCenter.generalServer
     request.api = @"foo/bar";
     request.parameters = @{@"param1": @"value1", @"param2": @"value2"};
     request.httpMethod = kXMHTTPMethodPOST; // 可选，默认为 `POST`
@@ -392,7 +392,7 @@ XMNetworking 的代码结构非常简洁和紧凑，只包含了 4 个核心文�
 
 ## 贡献者
 * [southpeak](https://github.com/southpeak)
-* [Xcoce-Men Team](http://www.jianshu.com/users/d509cc369c78/)
+* [Xcode-Men Team](http://www.jianshu.com/users/d509cc369c78/)
 
 ## 许可证
 XMNetworking 使用 MIT 许可证，详情见 [LICENSE](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE) 文件。
