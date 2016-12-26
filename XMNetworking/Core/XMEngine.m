@@ -378,8 +378,7 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
     if (!_afJSONResponseSerializer) {
         _afJSONResponseSerializer = [AFJSONResponseSerializer serializer];
         // Append more other commonly-used types to the JSON responses accepted MIME types.
-        _afJSONResponseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", @"text/plain", nil];
-        
+        //_afJSONResponseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", @"text/plain", nil];
     }
     return _afJSONResponseSerializer;
 }

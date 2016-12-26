@@ -231,7 +231,7 @@
             }
         } else {
             XM_SAFE_BLOCK(_chainSuccessBlock, _responseArray);
-            XM_SAFE_BLOCK(_chainFinishedBlock, nil, _responseArray);
+            XM_SAFE_BLOCK(_chainFinishedBlock, _responseArray, nil);
             [self cleanCallbackBlocks];
         }
     } else {
