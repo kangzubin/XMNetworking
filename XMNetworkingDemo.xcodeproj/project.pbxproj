@@ -7,13 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B92A5241E10C6430093EBD8 /* XMTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5231E10C6430093EBD8 /* XMTestCase.m */; };
+		4B92A5261E10E5720093EBD8 /* XMNormalRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5251E10E5720093EBD8 /* XMNormalRequestTests.m */; };
+		4B92A5281E1214E80093EBD8 /* XMUploadRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5271E1214E80093EBD8 /* XMUploadRequestTests.m */; };
+		4B92A52A1E12163C0093EBD8 /* testImage.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4B92A5291E12163C0093EBD8 /* testImage.jpg */; };
+		4B92A52C1E1237BF0093EBD8 /* XMDownloadRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A52B1E1237BF0093EBD8 /* XMDownloadRequestTests.m */; };
+		4B92A52E1E123C5E0093EBD8 /* XMBatchRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A52D1E123C5E0093EBD8 /* XMBatchRequestTests.m */; };
+		4B92A5301E123C800093EBD8 /* XMChainRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A52F1E123C800093EBD8 /* XMChainRequestTests.m */; };
+		4B92A5321E123CC10093EBD8 /* XMCenterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5311E123CC10093EBD8 /* XMCenterTests.m */; };
+		4B92A5341E126C050093EBD8 /* httpbin.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4B92A5331E12697D0093EBD8 /* httpbin.cer */; };
 		4BF800CF1DFED15C00999C54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800CE1DFED15C00999C54 /* main.m */; };
 		4BF800D21DFED15C00999C54 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800D11DFED15C00999C54 /* AppDelegate.m */; };
 		4BF800D51DFED15C00999C54 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800D41DFED15C00999C54 /* ViewController.m */; };
 		4BF800D81DFED15C00999C54 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4BF800D61DFED15C00999C54 /* Main.storyboard */; };
 		4BF800DA1DFED15C00999C54 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4BF800D91DFED15C00999C54 /* Assets.xcassets */; };
 		4BF800DD1DFED15C00999C54 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4BF800DB1DFED15C00999C54 /* LaunchScreen.storyboard */; };
-		4BF800E81DFED15C00999C54 /* XMNetworkingDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800E71DFED15C00999C54 /* XMNetworkingDemoTests.m */; };
 		4BF801051DFED2F200999C54 /* AFHTTPSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800F71DFED2F200999C54 /* AFHTTPSessionManager.m */; };
 		4BF801061DFED2F200999C54 /* AFNetworkActivityIndicatorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800F91DFED2F200999C54 /* AFNetworkActivityIndicatorManager.m */; };
 		4BF801071DFED2F200999C54 /* AFNetworkReachabilityManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800FC1DFED2F200999C54 /* AFNetworkReachabilityManager.m */; };
@@ -37,6 +45,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4B92A5221E10C6430093EBD8 /* XMTestCase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMTestCase.h; sourceTree = "<group>"; };
+		4B92A5231E10C6430093EBD8 /* XMTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMTestCase.m; sourceTree = "<group>"; };
+		4B92A5251E10E5720093EBD8 /* XMNormalRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMNormalRequestTests.m; sourceTree = "<group>"; };
+		4B92A5271E1214E80093EBD8 /* XMUploadRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMUploadRequestTests.m; sourceTree = "<group>"; };
+		4B92A5291E12163C0093EBD8 /* testImage.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = testImage.jpg; sourceTree = "<group>"; };
+		4B92A52B1E1237BF0093EBD8 /* XMDownloadRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMDownloadRequestTests.m; sourceTree = "<group>"; };
+		4B92A52D1E123C5E0093EBD8 /* XMBatchRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMBatchRequestTests.m; sourceTree = "<group>"; };
+		4B92A52F1E123C800093EBD8 /* XMChainRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMChainRequestTests.m; sourceTree = "<group>"; };
+		4B92A5311E123CC10093EBD8 /* XMCenterTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMCenterTests.m; sourceTree = "<group>"; };
+		4B92A5331E12697D0093EBD8 /* httpbin.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = httpbin.cer; sourceTree = "<group>"; };
 		4BF800CA1DFED15C00999C54 /* XMNetworkingDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XMNetworkingDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BF800CE1DFED15C00999C54 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		4BF800D01DFED15C00999C54 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -48,7 +66,6 @@
 		4BF800DC1DFED15C00999C54 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4BF800DE1DFED15C00999C54 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4BF800E31DFED15C00999C54 /* XMNetworkingDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMNetworkingDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4BF800E71DFED15C00999C54 /* XMNetworkingDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMNetworkingDemoTests.m; sourceTree = "<group>"; };
 		4BF800E91DFED15C00999C54 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4BF800F61DFED2F200999C54 /* AFHTTPSessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPSessionManager.h; sourceTree = "<group>"; };
 		4BF800F71DFED2F200999C54 /* AFHTTPSessionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPSessionManager.m; sourceTree = "<group>"; };
@@ -139,8 +156,17 @@
 		4BF800E61DFED15C00999C54 /* XMNetworkingDemoTests */ = {
 			isa = PBXGroup;
 			children = (
-				4BF800E71DFED15C00999C54 /* XMNetworkingDemoTests.m */,
 				4BF800E91DFED15C00999C54 /* Info.plist */,
+				4B92A5331E12697D0093EBD8 /* httpbin.cer */,
+				4B92A5291E12163C0093EBD8 /* testImage.jpg */,
+				4B92A5221E10C6430093EBD8 /* XMTestCase.h */,
+				4B92A5231E10C6430093EBD8 /* XMTestCase.m */,
+				4B92A5251E10E5720093EBD8 /* XMNormalRequestTests.m */,
+				4B92A5271E1214E80093EBD8 /* XMUploadRequestTests.m */,
+				4B92A52B1E1237BF0093EBD8 /* XMDownloadRequestTests.m */,
+				4B92A52D1E123C5E0093EBD8 /* XMBatchRequestTests.m */,
+				4B92A52F1E123C800093EBD8 /* XMChainRequestTests.m */,
+				4B92A5311E123CC10093EBD8 /* XMCenterTests.m */,
 			);
 			path = XMNetworkingDemoTests;
 			sourceTree = "<group>";
@@ -291,6 +317,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B92A5341E126C050093EBD8 /* httpbin.cer in Resources */,
+				4B92A52A1E12163C0093EBD8 /* testImage.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -321,7 +349,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4BF800E81DFED15C00999C54 /* XMNetworkingDemoTests.m in Sources */,
+				4B92A52C1E1237BF0093EBD8 /* XMDownloadRequestTests.m in Sources */,
+				4B92A52E1E123C5E0093EBD8 /* XMBatchRequestTests.m in Sources */,
+				4B92A5321E123CC10093EBD8 /* XMCenterTests.m in Sources */,
+				4B92A5241E10C6430093EBD8 /* XMTestCase.m in Sources */,
+				4B92A5281E1214E80093EBD8 /* XMUploadRequestTests.m in Sources */,
+				4B92A5301E123C800093EBD8 /* XMChainRequestTests.m in Sources */,
+				4B92A5261E10E5720093EBD8 /* XMNormalRequestTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -366,6 +366,9 @@ See also `AFSecurityPolicy` for more details.
 
 See [XMNetworking Documents Link](http://cocoadocs.org/docsets/XMNetworking/).
 
+## Unit Tests
+XMNetworking includes a suite of unit tests within the `XMNetworkingDemoTests` subdirectory, see test cases in the Tests Target for details.
+
 ## Architecture
 
 The soure code files for XMNetworking is compact and concise, there are only four core files in the library: The `XMConst.h` defines some const enums and blocks, and `XMRequest`, `XMCenter`, `XMEngine` are the declaration and implementation for core Class, the architecture of XMNetworking is as follwing:

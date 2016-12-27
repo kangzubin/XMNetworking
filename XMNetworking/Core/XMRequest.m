@@ -39,6 +39,12 @@
     _retryCount = 0;
     _identifier = 0;
     
+#ifdef DEBUG
+    if ([XMCenter defaultCenter].consoleLog) {
+        NSLog(@"%@: %s", self, __FUNCTION__);
+    }
+#endif
+    
     return self;
 }
 
@@ -78,7 +84,9 @@
 
 - (void)dealloc {
 #ifdef DEBUG
-    NSLog(@"%s", __FUNCTION__);
+    if ([XMCenter defaultCenter].consoleLog) {
+        NSLog(@"%@: %s", self, __FUNCTION__);
+    }
 #endif
 }
 
@@ -112,6 +120,12 @@
 
     _requestArray = [NSMutableArray array];
     _responseArray = [NSMutableArray array];
+    
+#ifdef DEBUG
+    if ([XMCenter defaultCenter].consoleLog) {
+        NSLog(@"%@: %s", self, __FUNCTION__);
+    }
+#endif
     
     return self;
 }
@@ -161,7 +175,9 @@
 
 - (void)dealloc {
 #ifdef DEBUG
-    NSLog(@"%s", __FUNCTION__);
+    if ([XMCenter defaultCenter].consoleLog) {
+        NSLog(@"%@: %s", self, __FUNCTION__);
+    }
 #endif
 }
 
@@ -196,6 +212,12 @@
     _chainIndex = 0;
     _responseArray = [NSMutableArray array];
     _nextBlockArray = [NSMutableArray array];
+    
+#ifdef DEBUG
+    if ([XMCenter defaultCenter].consoleLog) {
+        NSLog(@"%@: %s", self, __FUNCTION__);
+    }
+#endif
     
     return self;
 }
@@ -265,7 +287,9 @@
 
 - (void)dealloc {
 #ifdef DEBUG
-    NSLog(@"%s", __FUNCTION__);
+    if ([XMCenter defaultCenter].consoleLog) {
+        NSLog(@"%@: %s", self, __FUNCTION__);
+    }
 #endif
 }
 

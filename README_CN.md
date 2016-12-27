@@ -372,6 +372,9 @@ sleep(2);
 
 详见 [XMNetworking Documents Link](http://cocoadocs.org/docsets/XMNetworking/).
 
+## 单元测试
+XMNetworking 包含了一系列单元测试，用于验证网络请求的正确性，详见 `XMNetworkingDemoTests` 文件夹中的测试案例。
+
 ## 结构
 
 XMNetworking 的代码结构非常简洁和紧凑，只包含了 4 个核心文件：`XMConst.h` 用于定义全局常量枚举和 Block，`XMRequest`，`XMCenter` 和 `XMEngine` 则是核心类的声明和实现，具体的代码结构如下图所示：
