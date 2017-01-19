@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "XMNetworking"
-  s.version      = "1.0.1"
+  s.version      = "1.0.2"
   s.summary      = "A lightweight but powerful network library with simplified and expressive syntax based on AFNetworking."
   s.homepage     = "https://github.com/kangzubin/XMNetworking"
   s.license      = { :type => "MIT", :file => "LICENSE" }

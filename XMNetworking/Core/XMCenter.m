@@ -10,13 +10,17 @@
 #import "XMRequest.h"
 #import "XMEngine.h"
 
-@interface XMCenter ()
+@interface XMCenter () {
+    dispatch_semaphore_t _lock;
+}
 
-@property (nonatomic, copy, nullable, readwrite) NSString *generalServer;
+@property (nonatomic, assign) NSUInteger autoIncrement;
+@property (nonatomic, strong) NSMutableDictionary<NSString *, id> *runningBatchAndChainPool;
 @property (nonatomic, strong, readwrite) NSMutableDictionary<NSString *, id> *generalParameters;
 @property (nonatomic, strong, readwrite) NSMutableDictionary<NSString *, NSString *> *generalHeaders;
 
 @property (nonatomic, copy) XMCenterResponseProcessBlock responseProcessHandler;
+@property (nonatomic, copy) XMCenterRequestProcessBlock requestProcessHandler;
 
 @end
 
@@ -40,6 +44,9 @@
     if (!self) {
         return nil;
     }
+    _autoIncrement = 0;
+    _lock = dispatch_semaphore_create(1);
+    _engine = [XMEngine sharedEngine];
     return self;
 }
 
@@ -65,69 +72,88 @@
     if (config.generalUserInfo) {
         self.generalUserInfo = config.generalUserInfo;
     }
+    if (config.engine) {
+        self.engine = config.engine;
+    }
     self.consoleLog = config.consoleLog;
+}
+
+- (void)setRequestProcessBlock:(XMCenterRequestProcessBlock)block {
+    self.requestProcessHandler = block;
 }
 
 - (void)setResponseProcessBlock:(XMCenterResponseProcessBlock)block {
     self.responseProcessHandler = block;
 }
 
-- (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock {
+- (void)setGeneralHeaderValue:(NSString *)value forField:(NSString *)field {
+    [self.generalHeaders setValue:value forKey:field];
+}
+
+- (void)setGeneralParameterValue:(id)value forKey:(NSString *)key {
+    [self.generalParameters setValue:value forKey:key];
+}
+
+#pragma mark -
+
+- (NSString *)sendRequest:(XMRequestConfigBlock)configBlock {
     return [self sendRequest:configBlock onProgress:nil onSuccess:nil onFailure:nil onFinished:nil];
 }
 
-- (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
+- (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock {
     return [self sendRequest:configBlock onProgress:nil onSuccess:successBlock onFailure:nil onFinished:nil];
 }
 
-- (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
+- (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                 onFailure:(nullable XMFailureBlock)failureBlock {
     return [self sendRequest:configBlock onProgress:nil onSuccess:nil onFailure:failureBlock onFinished:nil];
 }
 
-- (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
+- (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                onFinished:(nullable XMFinishedBlock)finishedBlock {
     return [self sendRequest:configBlock onProgress:nil onSuccess:nil onFailure:nil onFinished:finishedBlock];
 }
 
-- (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
+- (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock
                 onFailure:(nullable XMFailureBlock)failureBlock {
     return [self sendRequest:configBlock onProgress:nil onSuccess:successBlock onFailure:failureBlock onFinished:nil];
 }
 
-- (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
+- (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock
                 onFailure:(nullable XMFailureBlock)failureBlock
                onFinished:(nullable XMFinishedBlock)finishedBlock {
     return [self sendRequest:configBlock onProgress:nil onSuccess:successBlock onFailure:failureBlock onFinished:finishedBlock];
 }
 
-- (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
+- (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                onProgress:(nullable XMProgressBlock)progressBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock
                 onFailure:(nullable XMFailureBlock)failureBlock {
     return [self sendRequest:configBlock onProgress:progressBlock onSuccess:successBlock onFailure:failureBlock onFinished:nil];
 }
 
-- (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
+- (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                onProgress:(nullable XMProgressBlock)progressBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock
                 onFailure:(nullable XMFailureBlock)failureBlock
                onFinished:(nullable XMFinishedBlock)finishedBlock {
     XMRequest *request = [XMRequest request];
+    XM_SAFE_BLOCK(self.requestProcessHandler, request);
     XM_SAFE_BLOCK(configBlock, request);
     
     [self xm_processRequest:request onProgress:progressBlock onSuccess:successBlock onFailure:failureBlock onFinished:finishedBlock];
+    [self xm_sendRequest:request];
     
-    return [self xm_sendRequest:request];
+    return request.identifier;
 }
 
-- (XMBatchRequest *)sendBatchRequest:(XMBatchRequestConfigBlock)configBlock
-                           onSuccess:(nullable XMBatchSuccessBlock)successBlock
-                           onFailure:(nullable XMBatchFailureBlock)failureBlock
-                          onFinished:(nullable XMBatchFinishedBlock)finishedBlock {
+- (NSString *)sendBatchRequest:(XMBatchRequestConfigBlock)configBlock
+                     onSuccess:(nullable XMBCSuccessBlock)successBlock
+                     onFailure:(nullable XMBCFailureBlock)failureBlock
+                    onFinished:(nullable XMBCFinishedBlock)finishedBlock {
     XMBatchRequest *batchRequest = [[XMBatchRequest alloc] init];
     XM_SAFE_BLOCK(configBlock, batchRequest);
     
@@ -145,29 +171,42 @@
         [batchRequest.responseArray removeAllObjects];
         for (XMRequest *request in batchRequest.requestArray) {
             [batchRequest.responseArray addObject:[NSNull null]];
+            __weak __typeof(self)weakSelf = self;
             [self xm_processRequest:request
                          onProgress:nil
                           onSuccess:nil
                           onFailure:nil
                          onFinished:^(id responseObject, NSError *error) {
-                             [batchRequest onFinishedOneRequest:request response:responseObject error:error];
+                             if ([batchRequest onFinishedOneRequest:request response:responseObject error:error]) {
+                                 __strong __typeof(weakSelf)strongSelf = weakSelf;
+                                 dispatch_semaphore_wait(strongSelf->_lock, DISPATCH_TIME_FOREVER);
+                                 [strongSelf.runningBatchAndChainPool removeObjectForKey:batchRequest.identifier];
+                                 dispatch_semaphore_signal(strongSelf->_lock);
+                             }
                          }];
             [self xm_sendRequest:request];
         }
-        return batchRequest;
+        
+        NSString *identifier = [self xm_identifierForBatchAndChainRequest];
+        [batchRequest setValue:identifier forKey:@"_identifier"];
+        XMLock();
+        [self.runningBatchAndChainPool setValue:batchRequest forKey:identifier];
+        XMUnlock();
+        
+        return identifier;
     } else {
         return nil;
     }
 }
 
-- (XMChainRequest *)sendChainRequest:(XMChainRequestConfigBlock)configBlock
-                           onSuccess:(nullable XMBatchSuccessBlock)successBlock
-                           onFailure:(nullable XMBatchFailureBlock)failureBlock
-                          onFinished:(nullable XMBatchFinishedBlock)finishedBlock {
+- (NSString *)sendChainRequest:(XMChainRequestConfigBlock)configBlock
+                     onSuccess:(nullable XMBCSuccessBlock)successBlock
+                     onFailure:(nullable XMBCFailureBlock)failureBlock
+                    onFinished:(nullable XMBCFinishedBlock)finishedBlock {
     XMChainRequest *chainRequest = [[XMChainRequest alloc] init];
     XM_SAFE_BLOCK(configBlock, chainRequest);
     
-    if (chainRequest.firstRequest) {
+    if (chainRequest.runningRequest) {
         if (successBlock) {
             [chainRequest setValue:successBlock forKey:@"_chainSuccessBlock"];
         }
@@ -178,11 +217,70 @@
             [chainRequest setValue:finishedBlock forKey:@"_chainFinishedBlock"];
         }
         
-        [self xm_sendChainRequest:chainRequest withRequest:chainRequest.firstRequest];
-        return chainRequest;
+        [self xm_sendChainRequest:chainRequest];
+        
+        NSString *identifier = [self xm_identifierForBatchAndChainRequest];
+        [chainRequest setValue:identifier forKey:@"_identifier"];
+        XMLock();
+        [self.runningBatchAndChainPool setValue:chainRequest forKey:identifier];
+        XMUnlock();
+        
+        return identifier;
     } else {
         return nil;
     }
+}
+
+#pragma mark -
+
+- (void)cancelRequest:(NSString *)identifier {
+    [self cancelRequest:identifier onCancel:nil];
+}
+
+- (void)cancelRequest:(NSString *)identifier
+             onCancel:(nullable XMCancelBlock)cancelBlock {
+    id request = nil;
+    if ([identifier hasPrefix:@"BC"]) {
+        XMLock();
+        request = [self.runningBatchAndChainPool objectForKey:identifier];
+        [self.runningBatchAndChainPool removeObjectForKey:identifier];
+        XMUnlock();
+        if ([request isKindOfClass:[XMBatchRequest class]]) {
+            XMBatchRequest *batchRequest = request;
+            if (batchRequest.requestArray.count > 0) {
+                for (XMRequest *rq in batchRequest.requestArray) {
+                    if (rq.identifier.length > 0) {
+                        [self.engine cancelRequestByIdentifier:rq.identifier];
+                    }
+                }
+            }
+        } else if ([request isKindOfClass:[XMChainRequest class]]) {
+            XMChainRequest *chainRequest = request;
+            if (chainRequest.runningRequest && chainRequest.runningRequest.identifier.length > 0) {
+                [self.engine cancelRequestByIdentifier:chainRequest.runningRequest.identifier];
+            }
+        }
+    } else if (identifier.length > 0) {
+        request = [self.engine cancelRequestByIdentifier:identifier];
+    }
+    XM_SAFE_BLOCK(cancelBlock, request);
+}
+
+- (id)getRequest:(NSString *)identifier {
+    if (identifier == nil) {
+        return nil;
+    } else if ([identifier hasPrefix:@"BC"]) {
+        XMLock();
+        id request = [self.runningBatchAndChainPool objectForKey:identifier];
+        XMUnlock();
+        return request;
+    } else {
+        return [self.engine getRequestByIdentifier:identifier];
+    }
+}
+
+- (BOOL)isNetworkReachable {
+    return self.engine.reachabilityStatus != 0;
 }
 
 #pragma mark - Public Class Methods for XMCenter
@@ -191,58 +289,64 @@
     [[XMCenter defaultCenter] setupConfig:block];
 }
 
++ (void)setRequestProcessBlock:(XMCenterRequestProcessBlock)block {
+    [[XMCenter defaultCenter] setRequestProcessBlock:block];
+}
+
 + (void)setResponseProcessBlock:(XMCenterResponseProcessBlock)block {
     [[XMCenter defaultCenter] setResponseProcessBlock:block];
 }
 
-+ (void)setGeneralHeaderValue:(nullable NSString *)value forField:(NSString *)field {
++ (void)setGeneralHeaderValue:(NSString *)value forField:(NSString *)field {
     [[XMCenter defaultCenter].generalHeaders setValue:value forKey:field];
 }
 
-+ (void)setGeneralParameterValue:(nullable NSString *)value forKey:(NSString *)key {
++ (void)setGeneralParameterValue:(id)value forKey:(NSString *)key {
     [[XMCenter defaultCenter].generalParameters setValue:value forKey:key];
 }
 
-+ (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock {
+#pragma mark -
+
++ (NSString *)sendRequest:(XMRequestConfigBlock)configBlock {
     return [[XMCenter defaultCenter] sendRequest:configBlock onProgress:nil onSuccess:nil onFailure:nil onFinished:nil];
 }
 
-+ (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
++ (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock {
     return [[XMCenter defaultCenter] sendRequest:configBlock onProgress:nil onSuccess:successBlock onFailure:nil onFinished:nil];
 }
 
-+ (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
++ (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                 onFailure:(nullable XMFailureBlock)failureBlock {
     return [[XMCenter defaultCenter] sendRequest:configBlock onProgress:nil onSuccess:nil onFailure:failureBlock onFinished:nil];
 }
 
-+ (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
++ (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                onFinished:(nullable XMFinishedBlock)finishedBlock {
     return [[XMCenter defaultCenter] sendRequest:configBlock onProgress:nil onSuccess:nil onFailure:nil onFinished:finishedBlock];
 }
 
-+ (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
++ (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock
                 onFailure:(nullable XMFailureBlock)failureBlock {
     return [[XMCenter defaultCenter] sendRequest:configBlock onProgress:nil onSuccess:successBlock onFailure:failureBlock onFinished:nil];
 }
 
-+ (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
++ (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock
                 onFailure:(nullable XMFailureBlock)failureBlock
                onFinished:(nullable XMFinishedBlock)finishedBlock {
     return [[XMCenter defaultCenter] sendRequest:configBlock onProgress:nil onSuccess:successBlock onFailure:failureBlock onFinished:finishedBlock];
 }
 
-+ (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
++ (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                onProgress:(nullable XMProgressBlock)progressBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock
                 onFailure:(nullable XMFailureBlock)failureBlock {
     return [[XMCenter defaultCenter] sendRequest:configBlock onProgress:progressBlock onSuccess:successBlock onFailure:failureBlock onFinished:nil];
 }
 
-+ (NSUInteger)sendRequest:(XMRequestConfigBlock)configBlock
++ (NSString *)sendRequest:(XMRequestConfigBlock)configBlock
                onProgress:(nullable XMProgressBlock)progressBlock
                 onSuccess:(nullable XMSuccessBlock)successBlock
                 onFailure:(nullable XMFailureBlock)failureBlock
@@ -250,55 +354,73 @@
     return [[XMCenter defaultCenter] sendRequest:configBlock onProgress:progressBlock onSuccess:successBlock onFailure:failureBlock onFinished:finishedBlock];
 }
 
-+ (XMBatchRequest *)sendBatchRequest:(XMBatchRequestConfigBlock)configBlock
-                           onSuccess:(nullable XMBatchSuccessBlock)successBlock
-                           onFailure:(nullable XMBatchFailureBlock)failureBlock
-                          onFinished:(nullable XMBatchFinishedBlock)finishedBlock {
++ (NSString *)sendBatchRequest:(XMBatchRequestConfigBlock)configBlock
+                     onSuccess:(nullable XMBCSuccessBlock)successBlock
+                     onFailure:(nullable XMBCFailureBlock)failureBlock
+                    onFinished:(nullable XMBCFinishedBlock)finishedBlock {
     return [[XMCenter defaultCenter] sendBatchRequest:configBlock onSuccess:successBlock onFailure:failureBlock onFinished:finishedBlock];
 }
 
-+ (XMChainRequest *)sendChainRequest:(XMChainRequestConfigBlock)configBlock
-                           onSuccess:(nullable XMBatchSuccessBlock)successBlock
-                           onFailure:(nullable XMBatchFailureBlock)failureBlock
-                          onFinished:(nullable XMBatchFinishedBlock)finishedBlock {
++ (NSString *)sendChainRequest:(XMChainRequestConfigBlock)configBlock
+                     onSuccess:(nullable XMBCSuccessBlock)successBlock
+                     onFailure:(nullable XMBCFailureBlock)failureBlock
+                    onFinished:(nullable XMBCFinishedBlock)finishedBlock {
     return [[XMCenter defaultCenter] sendChainRequest:configBlock onSuccess:successBlock onFailure:failureBlock onFinished:finishedBlock];
 }
 
-+ (void)cancelRequest:(NSUInteger)identifier {
-    [self cancelRequest:identifier onCancel:nil];
+#pragma mark -
+
++ (void)cancelRequest:(NSString *)identifier {
+    [[XMCenter defaultCenter] cancelRequest:identifier onCancel:nil];
 }
 
-+ (void)cancelRequest:(NSUInteger)identifier
++ (void)cancelRequest:(NSString *)identifier
              onCancel:(nullable XMCancelBlock)cancelBlock {
-    XMRequest *request = [[XMEngine sharedEngine] cancelRequestByIdentifier:identifier];
-    XM_SAFE_BLOCK(cancelBlock, request);
+    [[XMCenter defaultCenter] cancelRequest:identifier onCancel:cancelBlock];
 }
 
-+ (nullable XMRequest *)getRequest:(NSUInteger)identifier {
-    return [[XMEngine sharedEngine]getRequestByIdentifier:identifier];
++ (nullable id)getRequest:(NSString *)identifier {
+    return [[XMCenter defaultCenter] getRequest:identifier];
 }
 
 + (BOOL)isNetworkReachable {
-    return [XMEngine sharedEngine].networkReachability != 0;
+    return [[XMCenter defaultCenter] isNetworkReachable];
+}
+
+#pragma mark -
+
++ (void)addSSLPinningURL:(NSString *)url {
+    [[XMCenter defaultCenter].engine addSSLPinningURL:url];
+}
+
++ (void)addSSLPinningCert:(NSData *)cert {
+    [[XMCenter defaultCenter].engine addSSLPinningCert:cert];
 }
 
 #pragma mark - Private Methods for XMCenter
 
-- (void)xm_sendChainRequest:(XMChainRequest *)chainRequest withRequest:(XMRequest *)request {
-    __weak __typeof(self)weakSelf = self;
-    [self xm_processRequest:request
-                 onProgress:nil
-                  onSuccess:nil
-                  onFailure:nil
-                 onFinished:^(id responseObject, NSError *error) {
-                     __strong __typeof(weakSelf)strongSelf = weakSelf;
-                     [chainRequest onFinishedOneRequest:request response:responseObject error:error];
-                     if (chainRequest.nextRequest) {
-                         [strongSelf xm_sendChainRequest:chainRequest withRequest:chainRequest.nextRequest];
-                     }
-                 }];
-    
-    [self xm_sendRequest:request];
+- (void)xm_sendChainRequest:(XMChainRequest *)chainRequest {
+    if (chainRequest.runningRequest != nil) {
+        __weak __typeof(self)weakSelf = self;
+        [self xm_processRequest:chainRequest.runningRequest
+                     onProgress:nil
+                      onSuccess:nil
+                      onFailure:nil
+                     onFinished:^(id responseObject, NSError *error) {
+                         __strong __typeof(weakSelf)strongSelf = weakSelf;
+                         if ([chainRequest onFinishedOneRequest:chainRequest.runningRequest response:responseObject error:error]) {
+                             dispatch_semaphore_wait(strongSelf->_lock, DISPATCH_TIME_FOREVER);
+                             [strongSelf.runningBatchAndChainPool removeObjectForKey:chainRequest.identifier];
+                             dispatch_semaphore_signal(strongSelf->_lock);
+                         } else {
+                             if (chainRequest.runningRequest != nil) {
+                                 [strongSelf xm_sendChainRequest:chainRequest];
+                             }
+                         }
+                     }];
+        
+        [self xm_sendRequest:chainRequest.runningRequest];
+    }
 }
 
 - (void)xm_processRequest:(XMRequest *)request
@@ -365,7 +487,7 @@
     NSAssert(request.url.length > 0, @"The request url can't be null.");
 }
 
-- (NSUInteger)xm_sendRequest:(XMRequest *)request {
+- (void)xm_sendRequest:(XMRequest *)request {
     
     if (self.consoleLog) {
         if (request.requestType == kXMRequestDownload) {
@@ -376,7 +498,7 @@
     }
     
     // send the request through XMEngine.
-    return [[XMEngine sharedEngine] sendRequest:request completionHandler:^(id responseObject, NSError *error) {
+    [self.engine sendRequest:request completionHandler:^(id responseObject, NSError *error) {
         // the completionHandler will be execured in a private concurrent dispatch queue.
         if (error) {
             [self xm_failureWithError:error forRequest:request];
@@ -459,7 +581,23 @@
     [request cleanCallbackBlocks];
 }
 
+- (NSString *)xm_identifierForBatchAndChainRequest {
+    NSString *identifier = nil;
+    XMLock();
+    self.autoIncrement++;
+    identifier = [NSString stringWithFormat:@"BC%lu", (unsigned long)self.autoIncrement];
+    XMUnlock();
+    return identifier;
+}
+
 #pragma mark - Accessor
+
+- (NSMutableDictionary<NSString *, id> *)runningBatchAndChainPool {
+    if (!_runningBatchAndChainPool) {
+        _runningBatchAndChainPool = [NSMutableDictionary dictionary];
+    }
+    return _runningBatchAndChainPool;
+}
 
 - (NSMutableDictionary<NSString *, id> *)generalParameters {
     if (!_generalParameters) {

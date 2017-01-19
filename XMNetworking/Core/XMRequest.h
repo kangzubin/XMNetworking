@@ -24,10 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)request;
 
 /**
- The unique identifier for a XMRequest object, the value is assigned by XMCenter when the request is sent,
- NOTE: DO NOT overwrite the identifier value in order to ensure consistent default behavior.
+ The unique identifier for a XMRequest object, the value is assigned by XMCenter when the request is sent.
  */
-@property (nonatomic, assign) NSUInteger identifier;
+@property (nonatomic, copy, readonly) NSString *identifier;
 
 /**
  The server address for request, eg. "http://example.com/v1/", if `nil` (default) and the `useGeneralServer` property is `YES` (default), the `generalServer` of XMCenter is used.
@@ -55,9 +54,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, strong, nullable) NSDictionary<NSString *, NSString *> *headers;
 
-@property (nonatomic, assign) BOOL useGeneralServer;        //!< Whether use `generalServer` of XMCenter or not when request `server` is `nil`, `YES` by default.
-@property (nonatomic, assign) BOOL useGeneralHeaders;       //!< Whether append `generalHeaders` of XMCenter to request `headers` or not, `YES` by default.
-@property (nonatomic, assign) BOOL useGeneralParameters;    //!< Whether append `generalParameters` of XMCenter to request `parameters` or not, `YES` by default.
+@property (nonatomic, assign) BOOL useGeneralServer;        //!< Whether or not to use `generalServer` of XMCenter when request `server` is `nil`, `YES` by default.
+@property (nonatomic, assign) BOOL useGeneralHeaders;       //!< Whether or not to append `generalHeaders` of XMCenter to request `headers`, `YES` by default.
+@property (nonatomic, assign) BOOL useGeneralParameters;    //!< Whether or not to append `generalParameters` of XMCenter to request `parameters`, `YES` by default.
 
 /**
  Type for request: Normal, Upload or Download, `kXMRequestNormal` by default.
@@ -151,10 +150,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface XMBatchRequest : NSObject
 
-@property (nonatomic, strong, readonly) NSMutableArray<XMRequest *> *requestArray;
-@property (nonatomic, strong, readonly) NSMutableArray<id> *responseArray;
-- (void)onFinishedOneRequest:(XMRequest *)request response:(nullable id)responseObject error:(nullable NSError *)error;
-- (void)cancelWithBlock:(nullable void (^)())cancelBlock;
+@property (nonatomic, copy, readonly) NSString *identifier;
+@property (nonatomic, strong, readonly) NSMutableArray *requestArray;
+@property (nonatomic, strong, readonly) NSMutableArray *responseArray;
+
+- (BOOL)onFinishedOneRequest:(XMRequest *)request response:(nullable id)responseObject error:(nullable NSError *)error;
 
 @end
 
@@ -166,12 +166,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface XMChainRequest : NSObject
 
-@property (nonatomic, strong, readonly) XMRequest *firstRequest;
-@property (nonatomic, strong, readonly) XMRequest *nextRequest;
+@property (nonatomic, copy, readonly) NSString *identifier;
+@property (nonatomic, strong, readonly) XMRequest *runningRequest;
+
 - (XMChainRequest *)onFirst:(XMRequestConfigBlock)firstBlock;
-- (XMChainRequest *)onNext:(XMChainNextBlock)nextBlock;
-- (void)onFinishedOneRequest:(XMRequest *)request response:(nullable id)responseObject error:(nullable NSError *)error;
-- (void)cancelWithBlock:(nullable void (^)())cancelBlock;
+- (XMChainRequest *)onNext:(XMBCNextBlock)nextBlock;
+
+- (BOOL)onFinishedOneRequest:(XMRequest *)request response:(nullable id)responseObject error:(nullable NSError *)error;
 
 @end
 

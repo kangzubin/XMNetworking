@@ -295,7 +295,8 @@
 - (void)testCancelRunningRequest {
     XCTestExpectation *expectation1 = [self expectationWithDescription:@"Request should fail due to manually cancelled."];
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"Cancel block should be called."];
-    NSUInteger identifier = [XMCenter sendRequest:^(XMRequest * _Nonnull request) {
+    
+    NSString *identifier = [XMCenter sendRequest:^(XMRequest * _Nonnull request) {
         request.url = @"https://kangzubin.cn/test/timeout.php"; // This interface will return in 30 seconds later.
         request.httpMethod = kXMHTTPMethodGET;
         request.useGeneralParameters = NO;
@@ -312,7 +313,7 @@
         [expectation1 fulfill];
     }];
     
-    sleep(5);
+    sleep(2);
     
     [XMCenter cancelRequest:identifier onCancel:^(XMRequest * _Nullable request) {
         XCTAssertNotNil(request);

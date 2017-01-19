@@ -108,7 +108,7 @@
     XCTestExpectation *expectation1 = [self expectationWithDescription:@"The batch requests should succeed."];
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"The Cancel block should be called."];
     
-    XMBatchRequest *batchRequest = [XMCenter sendBatchRequest:^(XMBatchRequest * _Nonnull batchRequest) {
+    NSString *identifier = [XMCenter sendBatchRequest:^(XMBatchRequest * _Nonnull batchRequest) {
         XMRequest *request1 = [XMRequest request];
         request1.url = @"https://httpbin.org/get";
         request1.httpMethod = kXMHTTPMethodGET;
@@ -134,9 +134,12 @@
         [expectation1 fulfill];
     }];
     
-    sleep(5);
+    sleep(2);
     
-    [batchRequest cancelWithBlock:^{
+    [XMCenter cancelRequest:identifier onCancel:^(id _Nullable request) {
+        XMBatchRequest *batchRequest = request;
+        XCTAssertNotNil(batchRequest);
+        XCTAssertTrue(batchRequest.requestArray.count == 2);
         [expectation2 fulfill];
     }];
     

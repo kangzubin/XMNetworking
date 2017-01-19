@@ -33,21 +33,21 @@
             request.url = @"https://httpbin.org/get";
             request.httpMethod = kXMHTTPMethodGET;
             request.parameters = @{@"method": @"get"};
-        }] onNext:^(XMRequest * _Nonnull request, id  _Nullable responseObject, BOOL * _Nonnull sendNext) {
+        }] onNext:^(XMRequest * _Nonnull request, id  _Nullable responseObject, BOOL * _Nonnull isSent) {
             if ([responseObject[@"args"][@"method"] isEqualToString:@"get"]) {
                 request.url = @"https://httpbin.org/post";
                 request.httpMethod = kXMHTTPMethodPOST;
                 request.parameters = @{@"method": @"post"};
             } else {
-                *sendNext = NO;
+                *isSent = NO;
             }
-        }] onNext:^(XMRequest * _Nonnull request, id  _Nullable responseObject, BOOL * _Nonnull sendNext) {
+        }] onNext:^(XMRequest * _Nonnull request, id  _Nullable responseObject, BOOL * _Nonnull isSent) {
             if ([responseObject[@"form"][@"method"] isEqualToString:@"post"]) {
                 request.url = @"https://httpbin.org/put";
                 request.httpMethod = kXMHTTPMethodPUT;
                 request.parameters = @{@"method": @"put"};
             } else {
-                *sendNext = NO;
+                *isSent = NO;
             }
         }];
         
@@ -151,7 +151,7 @@
     XCTestExpectation *expectation1 = [self expectationWithDescription:@"The chain requests should succeed."];
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"The Cancel block should be called."];
     
-    XMChainRequest *chainRequest = [XMCenter sendChainRequest:^(XMChainRequest * _Nonnull chainRequest) {
+    NSString *identifier = [XMCenter sendChainRequest:^(XMChainRequest * _Nonnull chainRequest) {
         
         [[chainRequest onFirst:^(XMRequest * _Nonnull request) {
             request.url = @"https://httpbin.org/get";
@@ -180,9 +180,11 @@
         [expectation1 fulfill];
     }];
     
-    sleep(5);
+    sleep(2);
     
-    [chainRequest cancelWithBlock:^{
+    [XMCenter cancelRequest:identifier onCancel:^(id _Nullable request) {
+        XMChainRequest *chainRequest = request;
+        XCTAssertNotNil(chainRequest);
         [expectation2 fulfill];
     }];
     

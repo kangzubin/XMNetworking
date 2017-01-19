@@ -23,7 +23,7 @@ static dispatch_queue_t xm_request_completion_callback_queue() {
 
 #pragma mark - XMRequest Binding
 
-@implementation NSObject (BindingXMRequestForNSURLSessionTask)
+@implementation NSObject (BindingXMRequest)
 
 static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
 
@@ -40,28 +40,37 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
 
 #pragma mark - XMEngine
 
-@interface XMEngine (){
+@interface XMEngine () {
     dispatch_semaphore_t _lock;
 }
 
-@property (nonatomic, strong, readwrite) AFHTTPSessionManager *sessionManager;
+@property (nonatomic, strong) AFHTTPSessionManager *sessionManager;
+@property (nonatomic, strong) AFHTTPSessionManager *securitySessionManager;
 
+@property (nonatomic, strong) AFHTTPRequestSerializer *afHTTPRequestSerializer;
 @property (nonatomic, strong) AFJSONRequestSerializer *afJSONRequestSerializer;
-@property (nonatomic, strong) AFPropertyListRequestSerializer *afPropertyListRequestSerializer;
+@property (nonatomic, strong) AFPropertyListRequestSerializer *afPListRequestSerializer;
 
+@property (nonatomic, strong) AFHTTPResponseSerializer *afHTTPResponseSerializer;
 @property (nonatomic, strong) AFJSONResponseSerializer *afJSONResponseSerializer;
-@property (nonatomic, strong) AFXMLParserResponseSerializer *afXMLParserResponseSerializer;
-@property (nonatomic, strong) AFPropertyListResponseSerializer *afPropertyListResponseSerializer;
+@property (nonatomic, strong) AFXMLParserResponseSerializer *afXMLResponseSerializer;
+@property (nonatomic, strong) AFPropertyListResponseSerializer *afPListResponseSerializer;
+
+@property (nonatomic, strong) NSMutableArray *sslPinningHosts;
 
 @end
 
 @implementation XMEngine
 
++ (instancetype)engine {
+    return [[[self class] alloc] init];
+}
+
 + (instancetype)sharedEngine {
     static id sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[[self class] alloc] init];
+        sharedInstance = [self engine];
     });
     return sharedInstance;
 }
@@ -86,32 +95,63 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
     if (_sessionManager) {
         [_sessionManager invalidateSessionCancelingTasks:YES];
     }
+    if (_securitySessionManager) {
+        [_securitySessionManager invalidateSessionCancelingTasks:YES];
+    }
 }
 
 #pragma mark - Public Methods
 
-- (NSUInteger)sendRequest:(XMRequest *)request
-        completionHandler:(nullable XMCompletionHandler)completionHandler {
+- (void)sendRequest:(XMRequest *)request completionHandler:(XMCompletionHandler)completionHandler {
     if (request.requestType == kXMRequestNormal) {
-        return [self xm_dataTaskWithRequest:request completionHandler:completionHandler];
+        [self xm_dataTaskWithRequest:request completionHandler:completionHandler];
     } else if (request.requestType == kXMRequestUpload) {
-        return [self xm_uploadTaskWithRequest:request completionHandler:completionHandler];
+        [self xm_uploadTaskWithRequest:request completionHandler:completionHandler];
     } else if (request.requestType == kXMRequestDownload) {
-        return [self xm_downloadTaskWithRequest:request completionHandler:completionHandler];
+        [self xm_downloadTaskWithRequest:request completionHandler:completionHandler];
     } else {
         NSAssert(NO, @"Unknown request type.");
-        return 0;
     }
 }
 
-- (nullable XMRequest *)cancelRequestByIdentifier:(NSUInteger)identifier {
-    if (identifier == 0) return nil;
-    __block XMRequest *request = nil;
+- (XMRequest *)cancelRequestByIdentifier:(NSString *)identifier {
+    if (identifier.length == 0) return nil;
+    
     XMLock();
-    [self.sessionManager.tasks enumerateObjectsUsingBlock:^(NSURLSessionTask *task, NSUInteger idx, BOOL *stop) {
-        if (task.taskIdentifier == identifier) {
+    NSArray *tasks = nil;
+    if ([identifier hasPrefix:@"+"]) {
+        tasks = self.sessionManager.tasks;
+    } else if ([identifier hasPrefix:@"-"]) {
+        tasks = self.securitySessionManager.tasks;
+    }
+    __block XMRequest *request = nil;
+    if (tasks.count > 0) {
+        [tasks enumerateObjectsUsingBlock:^(NSURLSessionTask *task, NSUInteger idx, BOOL *stop) {
+            if ([task.bindedRequest.identifier isEqualToString:identifier]) {
+                request = task.bindedRequest;
+                [task cancel];
+                *stop = YES;
+            }
+        }];
+    }
+    XMUnlock();
+    return request;
+}
+
+- (XMRequest *)getRequestByIdentifier:(NSString *)identifier {
+    if (identifier.length == 0) return nil;
+    
+    XMLock();
+    NSArray *tasks = nil;
+    if ([identifier hasPrefix:@"+"]) {
+        tasks = self.sessionManager.tasks;
+    } else if ([identifier hasPrefix:@"-"]) {
+        tasks = self.securitySessionManager.tasks;
+    }
+    __block XMRequest *request = nil;
+    [tasks enumerateObjectsUsingBlock:^(NSURLSessionTask *task, NSUInteger idx, BOOL *stop) {
+        if ([task.bindedRequest.identifier isEqualToString:identifier]) {
             request = task.bindedRequest;
-            [task cancel];
             *stop = YES;
         }
     }];
@@ -119,28 +159,36 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
     return request;
 }
 
-- (nullable XMRequest *)getRequestByIdentifier:(NSUInteger)identifier {
-    if (identifier == 0) return nil;
-    __block XMRequest *request = nil;
-    XMLock();
-    [self.sessionManager.tasks enumerateObjectsUsingBlock:^(NSURLSessionTask *task, NSUInteger idx, BOOL *stop) {
-        if (task.taskIdentifier == identifier) {
-            request = task.bindedRequest;
-            *stop = YES;
-        }
-    }];
-    XMUnlock();
-    return request;
-}
-
-- (NSInteger)networkReachability {
+- (NSInteger)reachabilityStatus {
     return [AFNetworkReachabilityManager sharedManager].networkReachabilityStatus;
+}
+
+- (void)addSSLPinningURL:(NSString *)url {
+    if (url && [url hasPrefix:@"https"]) {
+        NSString *rootDomainName = [self xm_rootDomainNameFromURL:url];
+        if (rootDomainName && ![self.sslPinningHosts containsObject:rootDomainName]) {
+            [self.sslPinningHosts addObject:rootDomainName];
+        }
+    }
+}
+
+- (void)addSSLPinningCert:(NSData *)cert {
+    if (cert) {
+        NSMutableSet *certSet;
+        if (self.securitySessionManager.securityPolicy.pinnedCertificates.count > 0) {
+            certSet = [NSMutableSet setWithSet:self.securitySessionManager.securityPolicy.pinnedCertificates];
+        } else {
+            certSet = [NSMutableSet set];
+        }
+        [certSet addObject:cert];
+        [self.securitySessionManager.securityPolicy setPinnedCertificates:certSet];
+    }
 }
 
 #pragma mark - Private Methods
 
-- (NSUInteger)xm_dataTaskWithRequest:(XMRequest *)request
-                   completionHandler:(XMCompletionHandler)completionHandler {
+- (void)xm_dataTaskWithRequest:(XMRequest *)request
+             completionHandler:(XMCompletionHandler)completionHandler {
     NSString *httpMethod = nil;
     static dispatch_once_t onceToken;
     static NSArray *httpMethodArray = nil;
@@ -152,6 +200,7 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
     }
     NSAssert(httpMethod.length > 0, @"The HTTP method not found.");
     
+    AFHTTPSessionManager *sessionManager = [self xm_getSessionManager:request];
     AFHTTPRequestSerializer *requestSerializer = [self xm_getRequestSerializer:request];
     
     NSError *serializationError = nil;
@@ -166,14 +215,14 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
                 completionHandler(nil, serializationError);
             });
         }
-        return 0;
+        return;
     }
     
     [self xm_processURLRequest:urlRequest byXMRequest:request];
     
     NSURLSessionDataTask *dataTask = nil;
     __weak __typeof(self)weakSelf = self;
-    dataTask = [self.sessionManager dataTaskWithRequest:urlRequest
+    dataTask = [sessionManager dataTaskWithRequest:urlRequest
                                       completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         [strongSelf xm_processResponse:response
@@ -183,16 +232,15 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
                      completionHandler:completionHandler];
     }];
     
+    [self xm_setIdentifierForReqeust:request taskIdentifier:dataTask.taskIdentifier sessionManager:sessionManager];
     [dataTask bindingRequest:request];
-    [request setIdentifier:dataTask.taskIdentifier];
     [dataTask resume];
-    
-    return request.identifier;
 }
 
-- (NSUInteger)xm_uploadTaskWithRequest:(XMRequest *)request
-                      completionHandler:(XMCompletionHandler)completionHandler {
+- (void)xm_uploadTaskWithRequest:(XMRequest *)request
+               completionHandler:(XMCompletionHandler)completionHandler {
     
+    AFHTTPSessionManager *sessionManager = [self xm_getSessionManager:request];
     AFHTTPRequestSerializer *requestSerializer = [self xm_getRequestSerializer:request];
     
     __block NSError *serializationError = nil;
@@ -228,14 +276,14 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
                 completionHandler(nil, serializationError);
             });
         }
-        return 0;
+        return;
     }
     
     [self xm_processURLRequest:urlRequest byXMRequest:request];
     
     NSURLSessionUploadTask *uploadTask = nil;
     __weak __typeof(self)weakSelf = self;
-    uploadTask = [self.sessionManager uploadTaskWithStreamedRequest:urlRequest
+    uploadTask = [sessionManager uploadTaskWithStreamedRequest:urlRequest
                                                            progress:request.progressBlock
                                                   completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
@@ -246,15 +294,13 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
                      completionHandler:completionHandler];
     }];
     
+    [self xm_setIdentifierForReqeust:request taskIdentifier:uploadTask.taskIdentifier sessionManager:sessionManager];
     [uploadTask bindingRequest:request];
-    [request setIdentifier:uploadTask.taskIdentifier];
     [uploadTask resume];
-    
-    return request.identifier;
 }
 
-- (NSUInteger)xm_downloadTaskWithRequest:(XMRequest *)request
-                       completionHandler:(XMCompletionHandler)completionHandler {
+- (void)xm_downloadTaskWithRequest:(XMRequest *)request
+                 completionHandler:(XMCompletionHandler)completionHandler {
     NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:request.url]];
     [self xm_processURLRequest:urlRequest byXMRequest:request];
     
@@ -271,7 +317,8 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
     }
     
     NSURLSessionDownloadTask *downloadTask = nil;
-    downloadTask = [self.sessionManager downloadTaskWithRequest:urlRequest
+    AFHTTPSessionManager *sessionManager = [self xm_getSessionManager:request];
+    downloadTask = [sessionManager downloadTaskWithRequest:urlRequest
                                                        progress:request.progressBlock
                                                     destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
                                                         return downloadFileSavePath;
@@ -281,11 +328,9 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
                                                         }
                                                     }];
     
+    [self xm_setIdentifierForReqeust:request taskIdentifier:downloadTask.taskIdentifier sessionManager:sessionManager];
     [downloadTask bindingRequest:request];
-    [request setIdentifier:downloadTask.taskIdentifier];
     [downloadTask resume];
-    
-    return request.identifier;
 }
 
 - (void)xm_processURLRequest:(NSMutableURLRequest *)urlRequest byXMRequest:(XMRequest *)request {
@@ -319,13 +364,54 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
     }
 }
 
+- (void)xm_setIdentifierForReqeust:(XMRequest *)request
+                    taskIdentifier:(NSUInteger)taskIdentifier
+                    sessionManager:(AFHTTPSessionManager *)sessionManager {
+    NSString *identifier = nil;
+    if ([sessionManager isEqual:self.sessionManager]) {
+        identifier = [NSString stringWithFormat:@"+%lu", (unsigned long)taskIdentifier];
+    } else if ([sessionManager isEqual:self.securitySessionManager]) {
+        identifier = [NSString stringWithFormat:@"-%lu", (unsigned long)taskIdentifier];
+    }
+    [request setValue:identifier forKey:@"_identifier"];
+}
+
+- (NSString *)xm_rootDomainNameFromURL:(NSString *)urlString {
+    NSString *host = [[NSURL URLWithString:urlString] host];
+    // Separate the host into its constituent components, e.g. [@"secure", @"twitter", @"com"]
+    NSArray * hostComponents = [host componentsSeparatedByString:@"."];
+    if ([hostComponents count] >= 2) {
+        // Create a string out of the last two components in the host name, e.g. @"twitter" and @"com"
+        host = [NSString stringWithFormat:@"%@.%@", [hostComponents objectAtIndex:(hostComponents.count - 2)], [hostComponents objectAtIndex:(hostComponents.count - 1)]];
+    }
+    return host;
+}
+
+- (BOOL)xm_shouldSSLPinningWithURL:(NSString *)urlString {
+    if (urlString && [urlString hasPrefix:@"https"]) {
+        NSString *rootDomainName = [self xm_rootDomainNameFromURL:urlString];
+        if ([self.sslPinningHosts containsObject:rootDomainName]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+- (AFHTTPSessionManager *)xm_getSessionManager:(XMRequest *)request {
+    if ([self xm_shouldSSLPinningWithURL:request.url]) {
+        return self.securitySessionManager;
+    } else {
+        return self.sessionManager;
+    }
+}
+
 - (AFHTTPRequestSerializer *)xm_getRequestSerializer:(XMRequest *)request {
     if (request.requestSerializerType == kXMRequestSerializerRAW) {
-        return self.sessionManager.requestSerializer;
+        return self.afHTTPRequestSerializer;
     } else if(request.requestSerializerType == kXMRequestSerializerJSON) {
         return self.afJSONRequestSerializer;
     } else if (request.requestSerializerType == kXMRequestSerializerPlist) {
-        return self.afPropertyListRequestSerializer;
+        return self.afPListRequestSerializer;
     } else {
         NSAssert(NO, @"Unknown request serializer type.");
         return nil;
@@ -334,13 +420,13 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
 
 - (AFHTTPResponseSerializer *)xm_getResponseSerializer:(XMRequest *)request {
     if (request.responseSerializerType == kXMResponseSerializerRAW) {
-        return self.sessionManager.responseSerializer;
+        return self.afHTTPResponseSerializer;
     } else if (request.responseSerializerType == kXMResponseSerializerJSON) {
         return self.afJSONResponseSerializer;
     } else if (request.responseSerializerType == kXMResponseSerializerPlist) {
-        return self.afPropertyListResponseSerializer;
+        return self.afPListResponseSerializer;
     } else if (request.responseSerializerType == kXMResponseSerializerXML) {
-        return self.afXMLParserResponseSerializer;
+        return self.afXMLResponseSerializer;
     } else {
         NSAssert(NO, @"Unknown response serializer type.");
         return nil;
@@ -352,11 +438,32 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
 - (AFHTTPSessionManager *)sessionManager {
     if (!_sessionManager) {
         _sessionManager = [AFHTTPSessionManager manager];
-        _sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
+        _sessionManager.requestSerializer = self.afHTTPRequestSerializer;
+        _sessionManager.responseSerializer = self.afHTTPResponseSerializer;
         _sessionManager.operationQueue.maxConcurrentOperationCount = 5;
         _sessionManager.completionQueue = xm_request_completion_callback_queue();
     }
     return _sessionManager;
+}
+
+- (AFHTTPSessionManager *)securitySessionManager {
+    if (!_securitySessionManager) {
+        _securitySessionManager = [AFHTTPSessionManager manager];
+        _securitySessionManager.requestSerializer = self.afHTTPRequestSerializer;
+        _securitySessionManager.responseSerializer = self.afHTTPResponseSerializer;
+        _securitySessionManager.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+        _securitySessionManager.operationQueue.maxConcurrentOperationCount = 5;
+        _securitySessionManager.completionQueue = xm_request_completion_callback_queue();
+    }
+    return _securitySessionManager;
+}
+
+- (AFHTTPRequestSerializer *)afHTTPRequestSerializer {
+    if (!_afHTTPRequestSerializer) {
+        _afHTTPRequestSerializer = [AFHTTPRequestSerializer serializer];
+        
+    }
+    return _afHTTPRequestSerializer;
 }
 
 - (AFJSONRequestSerializer *)afJSONRequestSerializer {
@@ -367,11 +474,18 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
     return _afJSONRequestSerializer;
 }
 
-- (AFPropertyListRequestSerializer *)afPropertyListRequestSerializer {
-    if (!_afPropertyListRequestSerializer) {
-        _afPropertyListRequestSerializer = [AFPropertyListRequestSerializer serializer];
+- (AFPropertyListRequestSerializer *)afPListRequestSerializer {
+    if (!_afPListRequestSerializer) {
+        _afPListRequestSerializer = [AFPropertyListRequestSerializer serializer];
     }
-    return _afPropertyListRequestSerializer;
+    return _afPListRequestSerializer;
+}
+
+- (AFHTTPResponseSerializer *)afHTTPResponseSerializer {
+    if (!_afHTTPResponseSerializer) {
+        _afHTTPResponseSerializer = [AFHTTPResponseSerializer serializer];
+    }
+    return _afHTTPResponseSerializer;
 }
 
 - (AFJSONResponseSerializer *)afJSONResponseSerializer {
@@ -383,18 +497,25 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
     return _afJSONResponseSerializer;
 }
 
-- (AFXMLParserResponseSerializer *)afXMLParserResponseSerializer {
-    if (!_afXMLParserResponseSerializer) {
-        _afXMLParserResponseSerializer = [AFXMLParserResponseSerializer serializer];
+- (AFXMLParserResponseSerializer *)afXMLResponseSerializer {
+    if (!_afXMLResponseSerializer) {
+        _afXMLResponseSerializer = [AFXMLParserResponseSerializer serializer];
     }
-    return _afXMLParserResponseSerializer;
+    return _afXMLResponseSerializer;
 }
 
-- (AFPropertyListResponseSerializer *)afPropertyListResponseSerializer {
-    if (!_afPropertyListResponseSerializer) {
-        _afPropertyListResponseSerializer = [AFPropertyListResponseSerializer serializer];
+- (AFPropertyListResponseSerializer *)afPListResponseSerializer {
+    if (!_afPListResponseSerializer) {
+        _afPListResponseSerializer = [AFPropertyListResponseSerializer serializer];
     }
-    return _afPropertyListResponseSerializer;
+    return _afPListResponseSerializer;
+}
+
+- (NSMutableArray *)sslPinningHosts {
+    if (!_sslPinningHosts) {
+        _sslPinningHosts = [NSMutableArray array];
+    }
+    return _sslPinningHosts;
 }
 
 @end

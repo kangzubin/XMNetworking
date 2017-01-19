@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B4BBE6F1E30AC5B0044BCA8 /* httpbin.org.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4B4BBE6D1E30A7CC0044BCA8 /* httpbin.org.cer */; };
 		4B92A5241E10C6430093EBD8 /* XMTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5231E10C6430093EBD8 /* XMTestCase.m */; };
 		4B92A5261E10E5720093EBD8 /* XMNormalRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5251E10E5720093EBD8 /* XMNormalRequestTests.m */; };
 		4B92A5281E1214E80093EBD8 /* XMUploadRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5271E1214E80093EBD8 /* XMUploadRequestTests.m */; };
@@ -15,7 +16,6 @@
 		4B92A52E1E123C5E0093EBD8 /* XMBatchRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A52D1E123C5E0093EBD8 /* XMBatchRequestTests.m */; };
 		4B92A5301E123C800093EBD8 /* XMChainRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A52F1E123C800093EBD8 /* XMChainRequestTests.m */; };
 		4B92A5321E123CC10093EBD8 /* XMCenterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5311E123CC10093EBD8 /* XMCenterTests.m */; };
-		4B92A5341E126C050093EBD8 /* httpbin.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4B92A5331E12697D0093EBD8 /* httpbin.cer */; };
 		4BF800CF1DFED15C00999C54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800CE1DFED15C00999C54 /* main.m */; };
 		4BF800D21DFED15C00999C54 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800D11DFED15C00999C54 /* AppDelegate.m */; };
 		4BF800D51DFED15C00999C54 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800D41DFED15C00999C54 /* ViewController.m */; };
@@ -45,6 +45,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4B4BBE6D1E30A7CC0044BCA8 /* httpbin.org.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = httpbin.org.cer; sourceTree = "<group>"; };
 		4B92A5221E10C6430093EBD8 /* XMTestCase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMTestCase.h; sourceTree = "<group>"; };
 		4B92A5231E10C6430093EBD8 /* XMTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMTestCase.m; sourceTree = "<group>"; };
 		4B92A5251E10E5720093EBD8 /* XMNormalRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMNormalRequestTests.m; sourceTree = "<group>"; };
@@ -54,7 +55,6 @@
 		4B92A52D1E123C5E0093EBD8 /* XMBatchRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMBatchRequestTests.m; sourceTree = "<group>"; };
 		4B92A52F1E123C800093EBD8 /* XMChainRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMChainRequestTests.m; sourceTree = "<group>"; };
 		4B92A5311E123CC10093EBD8 /* XMCenterTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMCenterTests.m; sourceTree = "<group>"; };
-		4B92A5331E12697D0093EBD8 /* httpbin.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = httpbin.cer; sourceTree = "<group>"; };
 		4BF800CA1DFED15C00999C54 /* XMNetworkingDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XMNetworkingDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BF800CE1DFED15C00999C54 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		4BF800D01DFED15C00999C54 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -157,8 +157,8 @@
 			isa = PBXGroup;
 			children = (
 				4BF800E91DFED15C00999C54 /* Info.plist */,
-				4B92A5331E12697D0093EBD8 /* httpbin.cer */,
 				4B92A5291E12163C0093EBD8 /* testImage.jpg */,
+				4B4BBE6D1E30A7CC0044BCA8 /* httpbin.org.cer */,
 				4B92A5221E10C6430093EBD8 /* XMTestCase.h */,
 				4B92A5231E10C6430093EBD8 /* XMTestCase.m */,
 				4B92A5251E10E5720093EBD8 /* XMNormalRequestTests.m */,
@@ -317,7 +317,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B92A5341E126C050093EBD8 /* httpbin.cer in Resources */,
+				4B4BBE6F1E30AC5B0044BCA8 /* httpbin.org.cer in Resources */,
 				4B92A52A1E12163C0093EBD8 /* testImage.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -73,22 +73,32 @@ typedef void (^XMProgressBlock)(NSProgress *progress);
 typedef void (^XMSuccessBlock)(id _Nullable responseObject);
 typedef void (^XMFailureBlock)(NSError * _Nullable error);
 typedef void (^XMFinishedBlock)(id _Nullable responseObject, NSError * _Nullable error);
-typedef void (^XMCancelBlock)(XMRequest * _Nullable request);
+typedef void (^XMCancelBlock)(id _Nullable request); // The `request` might be a XMRequest/XMBatchRequest/XMChainRequest object.
 
-typedef void (^XMBatchSuccessBlock)(NSArray<id> *responseObjects);
-typedef void (^XMBatchFailureBlock)(NSArray<id> *errors);
-typedef void (^XMBatchFinishedBlock)(NSArray<id> * _Nullable responseObjects, NSArray<id> * _Nullable errors);
+///-------------------------------------------------
+/// @name Callback Blocks for Batch or Chain Request
+///-------------------------------------------------
 
-typedef void (^XMChainNextBlock)(XMRequest *request, id _Nullable responseObject, BOOL *sendNext);
+typedef void (^XMBCSuccessBlock)(NSArray *responseObjects);
+typedef void (^XMBCFailureBlock)(NSArray *errors);
+typedef void (^XMBCFinishedBlock)(NSArray * _Nullable responseObjects, NSArray * _Nullable errors);
+typedef void (^XMBCNextBlock)(XMRequest *request, id _Nullable responseObject, BOOL *isSent);
 
-///--------------------------------------
-/// @name XMCenter Response Process Block
-///--------------------------------------
+///------------------------------
+/// @name XMCenter Process Blocks
+///------------------------------
+
+/**
+ The custom request pre-process block for all XMRequests invoked by XMCenter.
+ 
+ @param request The current XMRequest object.
+ */
+typedef void (^XMCenterRequestProcessBlock)(XMRequest *request);
 
 /**
  The custom response process block for all XMRequests invoked by XMCenter.
 
- @param request The current XMRequest object
+ @param request The current XMRequest object.
  @param responseObject The response data return from server.
  @param error The error that occurred while the response data don't conforms to your own business logic.
  */
