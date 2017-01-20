@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class XMConfig, XMEngine;
 
 /**
- `XMCenter` is a global central place to send and manage network requests.
+ `XMCenter` is a global central place to send and manage all network requests.
  `+center` method is used to creates a new `XMCenter` object,
  `+defaultCenter` method will return a default shared `XMCenter` singleton object.
  

@@ -4,13 +4,13 @@ XMNetworking 是一个轻量的、简单易用但功能强大的网络库，基�
 
 其中，`XM` 前缀是我们团队 [Xcode-Men](http://www.jianshu.com/users/d509cc369c78/) 的缩写。[英文文档](https://github.com/kangzubin/XMNetworking)
 
-![Platform](https://img.shields.io/badge/platform-iOS-red.svg) ![Language](https://img.shields.io/badge/language-Objective--C-orange.svg) [![CocoaPods](https://img.shields.io/badge/pod-v1.0.0-blue.svg)](http://cocoadocs.org/docsets/XMNetworking/) [![Carthage](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE)
+![Platform](https://img.shields.io/badge/platform-iOS-red.svg) ![Language](https://img.shields.io/badge/language-Objective--C-orange.svg) [![CocoaPods](https://img.shields.io/badge/pod-v1.0.2-blue.svg)](http://cocoadocs.org/docsets/XMNetworking/) [![Carthage](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE)
 
 ## 简介
 
-![](http://img.kangzubin.cn/xmnetworking/XMNetworking.png) 
+![XMNetworking](http://img.kangzubin.cn/xmnetworking/XMNetworking.png) 
 
-如上图所示，XMNetworking 采用中心化的设计思想，由 `XMCenter` 统一发起并管理所有的 `XMRequest` 请求，并可通过 `XMCenter` 给所有请求配置回调线程、公共 Server URL、Header、Parameter 等信息，同时也可以 Block 注入的方式实现自定义的响应结果处理逻辑，如数据模型转换、业务错误码判断、网络缓存等。另外增加了 `XMEgine` 这一层是为了隔离底层第三方库依赖，便于以后切换其他底层网络库或自己实现底层逻辑。
+如上图所示，XMNetworking 采用中心化的设计思想，由 `XMCenter` 统一发起并管理所有的 `XMRequest` 请求，并可通过 `XMCenter` 给所有请求配置回调线程、公共 Server URL、Header、Parameter 等信息，同时也可以 Block 注入的方式给对所有请求做预处理以及实现自定义的请求响应结果处理逻辑，如数据模型转换、业务错误码判断、网络缓存等。另外增加了 `XMEgine` 这一层是为了隔离底层第三方库依赖，便于以后切换其他底层网络库或自己实现底层逻辑。
 
 ## 特性
 
@@ -89,6 +89,7 @@ github "kangzubin/XMNetworking"
     config.generalParameters = @{@"general-parameter": @"general parameter value"};
     config.generalUserInfo = nil;
     config.callbackQueue = dispatch_get_main_queue();
+    config.engine = [XMEngine sharedEngine];
 #ifdef DEBUG
     config.consoleLog = YES;
 #endif
@@ -102,6 +103,7 @@ github "kangzubin/XMNetworking"
 * **generalHeaders**: 公共请求头，如果一个 XMRequest 请求对象的 `useGeneralHeaders` 属性为 `YES`（默认），并且 XMCenter 的公共请求头 `generalHeaders` 不为空，那么这些公共请求头会自动加到该请求的 `headers` 中。
 * **generalUserInfo**: 公共用户信息，默认为 `nil`，如果一个 XMRequest 请求对象的 `userInfo` 属性为 `nil`（默认）而该字段不为 `nil`，那么该字段会自动赋值给 `XMRequest` 对象的 `userInfo`。而 `userInfo` 属性可用于区分具有相同上下文信息的不同请求。
 * **callbackQueue**: 请求的回调 Block 执行的 dispatch 队列（线程），如果为 `NULL`（默认），那么会在一个私有的并发队列（子线程）中执行回调 Block。
+* **engine**: 底层请求的引擎，默认为 `[XMEngine sharedEngine]` 单例对象，你也可以初始化一个 `XMEngine` 对象给它赋值。
 * **consoleLog**: 一个 `BOOL` 值，用于表示是否在控制台输出请求和响应的信息，默认为 `NO`。
 
 另外，你可以通过调用 `XMCenter` 的以下两个类方法来随时修改全局公共的 header 和 parameter：
@@ -243,11 +245,26 @@ typedef NS_ENUM(NSInteger, XMResponseSerializerType) {
 
 详见 `AFURLRequestSerialization.h` 和 `AFURLResponseSerialization.h` 获取更多细节。
 
-### 自定义响应结果的处理逻辑
+### 预处理和后处理插件
+#### 请求预处理
+你可以通过 `[XMCenter setRequestProcessBlock:...]` 设置 XMCenter 的预处理插件，在这里给所有请求做统一处理，另外需要注意的是，这个 `requestProcessBlock` 只对普通/上传/下载的请求有效，而对于批量请求和链式请求中的 `XMRequest` 对象，则不会走这个逻辑。
+
+```objc
+[XMCenter setRequestProcessBlock:^(XMRequest *request) {
+    // 自定义请求预处理逻辑
+    request.httpMethod = kXMHTTPMethodPOST;
+    request.requestSerializerType = kXMRequestSerializerRAW;
+    request.responseSerializerType = kXMResponseSerializerRAW;
+}];
+```
+
+#### 自定义响应结果的处理逻辑
 
 通常地，一个请求成功结束时，会执行 success block，当有错误发生时，执行 failure block。然而，开发中更常见的情况是，即使是一个请求成功结束，我们也需要进一步处理，比如验证响应结果数据、判断与服务端商量好的业务错误码类型等，再决定执行 success block 还是 failure block。
 
 现在，你可以调用 `[XMCenter setResponseProcessBlock:...]` 方法以 Block 注入的方式设置自定义的处理逻辑，当请求成功结束时，这个 Block 会在 success block 被执行前调用，如果传入 `*error` 参数被赋值，则接下来会执行 failure block。
+
+**在这里你可以对全局请求统一做业务错误码判断、数据模型转换、网络缓存等操作！**
 
 ```objc
 [XMCenter setResponseProcessBlock:^(XMRequest *request, id responseObject, NSError *__autoreleasing *error) {
@@ -271,16 +288,16 @@ XMNetworking 支持同时发一组批量请求，这组请求在业务逻辑上�
         
     [batchRequest.requestArray addObject:request1];
     [batchRequest.requestArray addObject:request2];
-} onSuccess:^(NSArray<id> *responseObjects) {
+} onSuccess:^(NSArray *responseObjects) {
     NSLog(@"onSuccess: %@", responseObjects);
-} onFailure:^(NSArray<id> *errors) {
+} onFailure:^(NSArray *errors) {
     NSLog(@"onFailure: %@", errors);
-} onFinished:^(NSArray<id> *responseObjects, NSArray<id> *errors) {
+} onFinished:^(NSArray *responseObjects, NSArray *errors) {
     NSLog(@"onFinished");
 }];
 ```
 
-`[XMCenter sendBatchRequest:...]` 方法会返回刚发起的新的 `XMBatchRequest` 对象，你可以保存这个对象，并在必要的时候调用它的 `-cancelWithBlock:` 方法取消这组批量请求。
+`[XMCenter sendBatchRequest:...]` 方法会返回刚发起的新的 `XMBatchRequest` 对象对应的唯一标识符 `identifier`，你通过 `identifier` 调用 XMCenter 的 `cancelRequest:` 方法取消这组批量请求。
 
 ### 链式请求
 
@@ -303,26 +320,25 @@ XMNetworking 同样支持发一组链式请求，这组请求之间互相依赖�
         request.url = @"server url 3";
         request.parameters = @{@"param1": @"value1", @"param2": @"value2"};
     }] onNext: ...];    
-} onSuccess:^(NSArray<id> *responseObjects) {
+} onSuccess:^(NSArray *responseObjects) {
     NSLog(@"onSuccess: %@", responseObjects);
-} onFailure:^(NSArray<id> *errors) {
+} onFailure:^(NSArray *errors) {
     NSLog(@"onFailure: %@", errors);
-} onFinished:^(NSArray<id> *responseObjects, NSArray<id> *errors) {
+} onFinished:^(NSArray *responseObjects, NSArray *errors) {
     NSLog(@"onFinished");
 }];
 ```
 
-`[XMCenter sendChainRequest:...]` 方法会返回刚发起的新的 `XMChainRequest` 对象，你可以保存这个对象，并在必要的时候调用它的 `-cancelWithBlock:` 方法取消这组链式请求。
+`[XMCenter sendChainRequest:...]` 方法会返回刚发起的新的 `XMChainRequest` 对象对应的唯一标识符 `identifier`，你通过 `identifier` 调用 XMCenter 的 `cancelRequest:` 方法取消这组链式请求。
 
 ### 取消一个网络请求
 
-当调用 `[XMCenter sendRequest:...]` 方法发送一个网络请求时，该方法会返回一个用于唯一标识该请求对象的 `identifier`（如果请求发送失败，该值为 `0`）。在必要的时候，你可以通过这个 `identifier` 来取消当前网络请求（如果一个请求已经结束，这时再用 `identifier` 来取消该请求时，会直接忽略）。
+当调用 `[XMCenter sendRequest:...]` 方法发送一个网络请求时，该方法会返回一个用于唯一标识该请求对象的 `identifier`（如果请求发送失败，该值为 `nil`）。在必要的时候，你可以通过这个 `identifier` 来取消当前网络请求（如果一个请求已经结束，这时再用 `identifier` 来取消该请求时，会直接忽略）。
 
 ```objc
 // send a request
-NSUInteger identifier = [XMCenter sendRequest:^(XMRequest *request) {
-    request.server = @"https://kangzubin.cn/";
-    request.api = @"test/index.php";
+NSString identifier = [XMCenter sendRequest:^(XMRequest *request) {
+    request.url = @"http://example.com/v1/foo/bar";
     request.httpMethod = kXMHTTPMethodGET;
     request.timeoutInterval = 10;
     request.retryCount = 1;
@@ -346,11 +362,10 @@ sleep(2);
 我们提供了两种方法用于获取网络的可连接性，分别如下：
 
 ```objc
-[XMCenter isNetworkReachable];
+[[XMCenter defaultCenter] isNetworkReachable];
 // 该方法会返回一个 Bool 值用于表示当前网络是否可连接。
-```
-```objc
-[[XMEngine sharedEngine] networkReachability]; 
+
+[[XMEngine sharedEngine] reachabilityStatus]; 
 // 该方法会返回一个当前网络的状态值，-1 表示 `Unknown`，0 表示 `NotReachable，1 表示 `WWAN`，2 表示 `WiFi`	
 ```
 
@@ -358,12 +373,22 @@ sleep(2);
 
 ### HTTPS 请求的本地证书校验（SSL Pinning）
 
-在你的应用程序包里添加 (pinned) 相应的 SSL 证书做校验有助于防止中间人攻击和其他安全漏洞。非常方便的是，AFNetworking 的 `AFSecurityPolicy` 安全模块可以通过校验本地保存的证书或公钥帮助我们评估服务器是否可信任以及建立安全连接。
+在你的应用程序包里添加 (pinned) 相应的 SSL 证书做校验有助于防止中间人攻击和其他安全漏洞。AFNetworking 的 `AFSecurityPolicy` 安全模块可以通过校验本地保存的证书或公钥帮助我们评估服务器是否可信任以及建立安全连接。
 
-我们在 `XMEngine` 中暴露了一个 `AFHTTPSessionManager` 对象叫 `sessionManager`，你可以通过修改该对象的 `securityPolicy` 类型，以开启 SSL Pinning 功能，并把你们服务器对应的 `.cer` 证书或者公钥放到你的工程中。
+在 XMNetworking 中，我们对 `AFSecurityPolicy` 进行了封装以便于使用，你可以通过 XMCenter 的 `addSSLPinningURL:` 方法添加需要做 SSL Pinning 的域名：
 
 ```objc
-[XMEngine sharedEngine].sessionManager.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+[XMCenter addSSLPinningURL:@"https://example.com/"];
+```
+
+默认你只需要把该域名对应的 .cer 格式的证书拖拽到你的工程中即可（即 .cer 所在的 bundle 需要与 XMNetworking 代码所在的 bundle 一致）。如果你是以 `embedded framework` 的方式（Carthage）集成 XMNetworking，则需要通过以下方式添加证书：
+
+```objc
+// Add SSL Pinning Certificate
+NSString *certPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"certificate file name" ofType:@"cer"];
+NSData *certData = [NSData dataWithContentsOfFile:certPath];
+[XMCenter addSSLPinningCert:certData];
+[XMCenter addSSLPinningURL:@"https://example.com/"];
 ```
 
 详见 `AFSecurityPolicy` 获取更多细节.
@@ -379,7 +404,7 @@ XMNetworking 包含了一系列单元测试，用于验证网络请求的正确�
 
 XMNetworking 的代码结构非常简洁和紧凑，只包含了 4 个核心文件：`XMConst.h` 用于定义全局常量枚举和 Block，`XMRequest`，`XMCenter` 和 `XMEngine` 则是核心类的声明和实现，具体的代码结构如下图所示：
 
-![](http://img.kangzubin.cn/xmnetworking/XMNetworking-nodes.png)
+![XMNetworking Structure](http://img.kangzubin.cn/xmnetworking/XMNetworking-structure.png)
 
 ## 待完善
 

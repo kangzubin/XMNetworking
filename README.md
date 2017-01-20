@@ -4,13 +4,13 @@ A lightweight but powerful network library with simplified and expressive syntax
 
 The prefix `XM` is the abbreviation of our team [Xcode-Men](http://www.jianshu.com/users/d509cc369c78/). [中文文档](https://github.com/kangzubin/XMNetworking/blob/master/README_CN.md)
 
-![Platform](https://img.shields.io/badge/platform-iOS-red.svg) ![Language](https://img.shields.io/badge/language-Objective--C-orange.svg) [![CocoaPods](https://img.shields.io/badge/pod-v1.0.0-blue.svg)](http://cocoadocs.org/docsets/XMNetworking/) [![Carthage](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE)
+![Platform](https://img.shields.io/badge/platform-iOS-red.svg) ![Language](https://img.shields.io/badge/language-Objective--C-orange.svg) [![CocoaPods](https://img.shields.io/badge/pod-v1.0.2-blue.svg)](http://cocoadocs.org/docsets/XMNetworking/) [![Carthage](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE)
 
 ## Introduction
 
-![](http://img.kangzubin.cn/xmnetworking/XMNetworking.png) 
+![XMNetworking](http://img.kangzubin.cn/xmnetworking/XMNetworking.png) 
 
-As shown in the picture above, the XMNetworking is designed with centralization thought, all the XMRequest objects are launched and managed by XMCenter, and you could modify the callback dispatch queue and general information such as server url, header and parameter for all request through XMCenter, as well as provide a custom processing block for response data, in which you could deal with model transformation, business error code checking, network cache and so on. Futhermore, in order to switch to other network library easily or implement the underlying logic by ourself in the future, we add a XMEngine layer to insulate the dependence of third party network library like AFNetworking.
+As shown in the picture above, the XMNetworking is designed with centralization thought, all the XMRequest objects are launched and managed by XMCenter, and you could modify the callback dispatch queue and general information such as server url, header and parameter for all request through XMCenter, as well as provide two custom pre and post processing block, in which you could set default value for request object and deal with model transformation for response data, business error code checking, network cache and so on. Futhermore, in order to switch to other network library easily or implement the underlying logic by ourself in the future, we add a XMEngine layer to insulate the dependence of third party network library like AFNetworking.
 
 ## Features
 
@@ -89,6 +89,7 @@ Download all the files in the `XMNetworking` *subdirectory*, then add the source
     config.generalParameters = @{@"general-parameter": @"general parameter value"};
     config.generalUserInfo = nil;
     config.callbackQueue = dispatch_get_main_queue();
+    config.engine = [XMEngine sharedEngine];
 #ifdef DEBUG
     config.consoleLog = YES;
 #endif
@@ -102,6 +103,7 @@ You could configure the XMCenter througth a `XMConfig` object by invoking `+setu
 * **generalHeaders**: The general headers for XMCenter, if XMRequest.useGeneralHeaders is `YES` and this property is not empty, it will be appended to XMRequest.headers.
 * **generalUserInfo**: The general user info for XMCenter, if XMRequest.userInfo is `nil` and this property is not `nil`, it will be assigned to XMRequest.userInfo, and the `userInfo` might be used to distinguish requests with same context.
 * **callbackQueue**: The dispatch queue for request callback blocks. If `NULL` (default), a private concurrent queue is used.
+* **engine**: The global requests engine for current XMCenter object, `[XMEngine sharedEngine]` by default.
 * **consoleLog**: Whether to print the request and response info in console or not, `NO` by default.
 
 And you could modify the general headers and parameters for XMCenter by following methods:
@@ -241,12 +243,29 @@ typedef NS_ENUM(NSInteger, XMResponseSerializerType) {
 
 See also `AFURLRequestSerialization.h` and `AFURLResponseSerialization.h` .
 
-### Custom Processing Logic for Response Data
+### Pre-process and Post-process Plugin
+#### Pre-process Block for Request
+You cloud invoke `[XMCenter setRequestProcessBlock:...]` to set pre-process plugin for XMCenter, in which you set default value for all request.
+
+Note that the `requestProcessBlock` is only suitable for Normal/Upload/Download reqeusts, and it is not effective for Batch and Chain requests.
+
+```objc
+[XMCenter setRequestProcessBlock:^(XMRequest *request) {
+    // custom pre process logic for all requests.
+    request.httpMethod = kXMHTTPMethodPOST;
+    request.requestSerializerType = kXMRequestSerializerRAW;
+    request.responseSerializerType = kXMResponseSerializerRAW;
+}];
+```
+
+#### Custom Post-processing Block for Response Data
 Normally, the success block is called when the network reqeust finished successfully, and the failure block is called when error occurred.
 
 Nonetheless, it's more likely that you might need to validate the response data or business error code agreed upon with server develorers even if the request is successfully finished. 
 
 Now you could invoke the `[XMCenter setResponseProcessBlock:...]` method to set a custom processing block for response data, the block is called before success block, and if the passed in `error` argument is assigned, the failure block will be called instead.
+
+**In this plugin you cloud deal with model transformation for response data, business error code checking, network cache and so on.**
 
 ```objc
 [XMCenter setResponseProcessBlock:^(XMRequest *request, id responseObject, NSError *__autoreleasing *error) {
@@ -269,16 +288,16 @@ Send batch requests concurrently, the all reqeusts are independent to each other
         
     [batchRequest.requestArray addObject:request1];
     [batchRequest.requestArray addObject:request2];
-} onSuccess:^(NSArray<id> *responseObjects) {
+} onSuccess:^(NSArray *responseObjects) {
     NSLog(@"onSuccess: %@", responseObjects);
-} onFailure:^(NSArray<id> *errors) {
+} onFailure:^(NSArray *errors) {
     NSLog(@"onFailure: %@", errors);
-} onFinished:^(NSArray<id> *responseObjects, NSArray<id> *errors) {
+} onFinished:^(NSArray *responseObjects, NSArray *errors) {
     NSLog(@"onFinished");
 }];
 ```
 
-The `[XMCenter sendBatchRequest:...]` method return the new running `XMBatchRequest` object, and the object might be used to cancel the batch requests by invoking its `-cancelWithBlock:` method.
+The `[XMCenter sendBatchRequest:...]` method return a `identifier` for new running `XMBatchRequest` object, and `identifier` might be used to cancel the batch requests by invoking XMCenter's `cancelRequest:` method.
 
 ### Chain Requests
 Send chain requests one by one, the next reqeust relied on the response result of the previous reqeust, and the success block is called until all reqeusts finished, while the failure block is called once error occurred. The bool value `sendNext` is used to confirm whether to start next reqeust.
@@ -300,24 +319,24 @@ Send chain requests one by one, the next reqeust relied on the response result o
         request.url = @"server url 3";
         request.parameters = @{@"param1": @"value1", @"param2": @"value2"};
     }] onNext: ...];    
-} onSuccess:^(NSArray<id> *responseObjects) {
+} onSuccess:^(NSArray *responseObjects) {
     NSLog(@"onSuccess: %@", responseObjects);
-} onFailure:^(NSArray<id> *errors) {
+} onFailure:^(NSArray *errors) {
     NSLog(@"onFailure: %@", errors);
-} onFinished:^(NSArray<id> *responseObjects, NSArray<id> *errors) {
+} onFinished:^(NSArray *responseObjects, NSArray *errors) {
     NSLog(@"onFinished");
 }];
 ```
-The `[XMCenter sendChainRequest:...]` method return the new running `XMChainRequest` object, and the object might be used to cancel the chain requests by invoking its `-cancelWithBlock:` method.
+The `[XMCenter sendChainRequest:...]` method return a `identifier` for new running `XMChainRequest` object, and `identifier` might be used to cancel the chain requests by invoking XMCenter's `cancelRequest:` method.
 
 ### Cancel the Running Request
 
-When you invoke `[XMCenter sendRequest:...]` to send a network reqeust, the method will return a unique identifier for the new running `XMRequest` object (`0` for fail), you could save the identifier value, and then cancel the running  request by identifier for your business logic later if need. If a request has already finished, and your still use its identifier to cancel the request, the action will be ignored directly.
+When you invoke `[XMCenter sendRequest:...]` to send a network reqeust, the method will return a unique identifier for the new running `XMRequest` object (`nil` for fail), you could save the identifier value, and then cancel the running  request by identifier for your business logic later if need. If a request has already finished, and your still use its identifier to cancel the request, the action will be ignored directly.
 
 ```objc
 // send a request
-NSUInteger identifier = [XMCenter sendRequest:^(XMRequest *request) {
-    request.server = @"https://kangzubin.cn/";
+NSString identifier = [XMCenter sendRequest:^(XMRequest *request) {
+    request.url = @"http://example.com/v1/foo/bar";
     request.api = @"test/index.php";
     request.httpMethod = kXMHTTPMethodGET;
     request.timeoutInterval = 10;
@@ -339,13 +358,11 @@ sleep(2);
 ### Network Reachability
 There are two ways to get the network reachability:
 ```objc
-[XMCenter isNetworkReachable]; 
+[[XMCenter defaultCenter] isNetworkReachable]; 
 // Return a bool value to comfirm whether network is reachable or not.
-```
-or
-```objc
-[[XMEngine sharedEngine] networkReachability]; 
-// Return the current network reachablity status, -1 to `Unknown`, 0 to `NotReachable, 1 to `WWAN` and 2 to `WiFi`	
+
+[[XMEngine sharedEngine] reachabilityStatus]; 
+// Return the current network reachablity status, -1 to `Unknown`, 0 to `NotReachable, 1 to `WWAN` and 2 to `WiFi`
 ```
 
 See also `AFNetworkReachabilityManager` for more details.
@@ -354,10 +371,20 @@ See also `AFNetworkReachabilityManager` for more details.
 
 Adding pinned SSL certificates to your app helps prevent man-in-the-middle attacks and other vulnerabilities. Conveniently, the `AFSecurityPolicy` module could help to evaluate server trust against pinned X.509 certificates and public keys over secure connections.
 
-There is a `AFHTTPSessionManager` object exposed in `XMEngine` named `sessionManager`, and you should firstly modify the `securityPolicy` mode for `sessionManager` to take SSL Pinning effective by following code, then add the `.cer` certificate file or public key to your project.
+In XMNetworking, we have integrated `AFSecurityPolicy` module for easy-to-use, now you could invoke the `addSSLPinningURL:` method of XMCenter to add domain name which should do SSL Pinning operation for its HTTPS requests.
 
 ```objc
-[XMEngine sharedEngine].sessionManager.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+[XMCenter addSSLPinningURL:@"https://example.com/"];
+```
+
+Then you only need to drag the .cer format certificate files to your project, it means that the bundle of .cer files should be the same with the bundle of XMNetworking's source code files. Note that if you are using XMNetworking as embedded framework (by Carthage), you need to add pinned certificates through following method:
+
+```objc
+// Add SSL Pinning Certificate
+NSString *certPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"certificate file name" ofType:@"cer"];
+NSData *certData = [NSData dataWithContentsOfFile:certPath];
+[XMCenter addSSLPinningCert:certData];
+[XMCenter addSSLPinningURL:@"https://example.com/"];
 ```
 
 See also `AFSecurityPolicy` for more details.
@@ -373,7 +400,7 @@ XMNetworking includes a suite of unit tests within the `XMNetworkingDemoTests` s
 
 The soure code files for XMNetworking is compact and concise, there are only four core files in the library: The `XMConst.h` defines some const enums and blocks, and `XMRequest`, `XMCenter`, `XMEngine` are the declaration and implementation for core Class, the architecture of XMNetworking is as follwing:
 
-![](http://img.kangzubin.cn/xmnetworking/XMNetworking-nodes.png)
+![XMNetworking Structure](http://img.kangzubin.cn/xmnetworking/XMNetworking-structure.png)
 
 ## To Do List
 

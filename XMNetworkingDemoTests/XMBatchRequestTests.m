@@ -1,6 +1,6 @@
 //
 //  XMBatchRequestTests.m
-//  XMNetworkingDemo
+//  XMNetworkingDemoTests
 //
 //  Created by Zubin Kang on 27/12/2016.
 //  Copyright © 2016 XMNetworking. All rights reserved.
