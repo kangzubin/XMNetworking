@@ -21,6 +21,43 @@ static dispatch_queue_t xm_request_completion_callback_queue() {
     return _xm_request_completion_callback_queue;
 }
 
+static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFStringRef keyPassword, SecIdentityRef *outIdentity, SecTrustRef *outTrust) {
+    OSStatus securityError = errSecSuccess;
+    
+    const void *keys[] = { kSecImportExportPassphrase };
+    const void *values[] = { keyPassword };
+    CFDictionaryRef optionsDictionary = NULL;
+    
+    /* Create a dictionary containing the passphrase if one was specified. Otherwise, create an empty dictionary. */
+    optionsDictionary = CFDictionaryCreate(NULL, keys, values, (keyPassword ? 1 : 0), NULL, NULL);
+    
+    CFArrayRef items = CFArrayCreate(NULL, 0, 0, NULL);
+    securityError = SecPKCS12Import(inPKCS12Data, optionsDictionary, &items);
+    
+    if (securityError == 0) {
+        CFDictionaryRef myIdentityAndTrust = CFArrayGetValueAtIndex(items, 0);
+        const void *tempIdentity = NULL;
+        tempIdentity = CFDictionaryGetValue(myIdentityAndTrust, kSecImportItemIdentity);
+        CFRetain(tempIdentity);
+        *outIdentity = (SecIdentityRef)tempIdentity;
+        
+        const void *tempTrust = NULL;
+        tempTrust = CFDictionaryGetValue (myIdentityAndTrust, kSecImportItemTrust);
+        CFRetain(tempTrust);
+        *outTrust = (SecTrustRef)tempTrust;
+    }
+    
+    if (optionsDictionary) {
+        CFRelease(optionsDictionary);
+    }
+    
+    if (items) {
+        CFRelease(items);
+    }
+    
+    return securityError;
+}
+
 #pragma mark - XMRequest Binding
 
 @implementation NSObject (BindingXMRequest)
@@ -164,7 +201,9 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
 }
 
 - (void)addSSLPinningURL:(NSString *)url {
-    if (url && [url hasPrefix:@"https"]) {
+    NSParameterAssert(url);
+    
+    if ([url hasPrefix:@"https"]) {
         NSString *rootDomainName = [self xm_rootDomainNameFromURL:url];
         if (rootDomainName && ![self.sslPinningHosts containsObject:rootDomainName]) {
             [self.sslPinningHosts addObject:rootDomainName];
@@ -173,16 +212,75 @@ static NSString * const kXMRequestBindingKey = @"kXMRequestBindingKey";
 }
 
 - (void)addSSLPinningCert:(NSData *)cert {
-    if (cert) {
-        NSMutableSet *certSet;
-        if (self.securitySessionManager.securityPolicy.pinnedCertificates.count > 0) {
-            certSet = [NSMutableSet setWithSet:self.securitySessionManager.securityPolicy.pinnedCertificates];
-        } else {
-            certSet = [NSMutableSet set];
-        }
-        [certSet addObject:cert];
-        [self.securitySessionManager.securityPolicy setPinnedCertificates:certSet];
+    NSParameterAssert(cert);
+    
+    NSMutableSet *certSet;
+    if (self.securitySessionManager.securityPolicy.pinnedCertificates.count > 0) {
+        certSet = [NSMutableSet setWithSet:self.securitySessionManager.securityPolicy.pinnedCertificates];
+    } else {
+        certSet = [NSMutableSet set];
     }
+    [certSet addObject:cert];
+    [self.securitySessionManager.securityPolicy setPinnedCertificates:certSet];}
+
+- (void)addTwowayAuthenticationPKCS12:(NSData *)p12 keyPassword:(NSString *)password {
+    NSParameterAssert(p12);
+    NSParameterAssert(password);
+    
+    __weak __typeof(self)weakSelf = self;
+    [self.securitySessionManager setSessionDidReceiveAuthenticationChallengeBlock:^NSURLSessionAuthChallengeDisposition(NSURLSession * _Nonnull session, NSURLAuthenticationChallenge * _Nonnull challenge, NSURLCredential *__autoreleasing  _Nullable * _Nullable credential) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        NSURLSessionAuthChallengeDisposition disposition = NSURLSessionAuthChallengePerformDefaultHandling;
+        if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust]) {
+            // Server Trust (SSL Pinning)
+            if ([strongSelf.securitySessionManager.securityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
+                *credential = [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust];
+                if (*credential) {
+                    disposition = NSURLSessionAuthChallengeUseCredential;
+                } else {
+                    disposition = NSURLSessionAuthChallengePerformDefaultHandling;
+                }
+            } else {
+                disposition = NSURLSessionAuthChallengeCancelAuthenticationChallenge;
+            }
+        } else if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodClientCertificate]) {
+            // Client Certificate (Two-way Authentication)
+            SecIdentityRef identity = NULL;
+            SecTrustRef trust = NULL;
+            
+            if (XMExtractIdentityAndTrustFromPKCS12((__bridge CFDataRef)p12, (__bridge CFStringRef)password, &identity, &trust) == 0) {
+                SecCertificateRef certificate = NULL;
+                SecIdentityCopyCertificate(identity, &certificate);
+                
+                const void *certs[] = { certificate };
+                CFArrayRef certArray = CFArrayCreate(kCFAllocatorDefault, certs, 1, NULL);
+                *credential = [NSURLCredential credentialWithIdentity:identity certificates:(__bridge NSArray *)certArray persistence:NSURLCredentialPersistencePermanent];
+                if (*credential) {
+                    disposition = NSURLSessionAuthChallengeUseCredential;
+                } else {
+                    disposition = NSURLSessionAuthChallengePerformDefaultHandling;
+                }
+                
+                if (certificate) {
+                    CFRelease(certificate);
+                }
+                if (certArray) {
+                    CFRelease(certArray);
+                }
+            }
+            
+            if (identity) {
+                CFRelease(identity);
+            }
+            if (trust) {
+                CFRelease(trust);
+            }
+        } else {
+            disposition = NSURLSessionAuthChallengePerformDefaultHandling;
+        }
+        
+        return disposition;
+    }];
 }
 
 #pragma mark - Private Methods

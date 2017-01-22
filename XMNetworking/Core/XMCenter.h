@@ -408,6 +408,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void)addSSLPinningURL:(NSString *)url;
 + (void)addSSLPinningCert:(NSData *)cert;
++ (void)addTwowayAuthenticationPKCS12:(NSData *)p12 keyPassword:(NSString *)password;
 
 @end
 

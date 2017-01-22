@@ -397,6 +397,10 @@
     [[XMCenter defaultCenter].engine addSSLPinningCert:cert];
 }
 
++ (void)addTwowayAuthenticationPKCS12:(NSData *)p12 keyPassword:(NSString *)password {
+    [[XMCenter defaultCenter].engine addTwowayAuthenticationPKCS12:p12 keyPassword:password];
+}
+
 #pragma mark - Private Methods for XMCenter
 
 - (void)xm_sendChainRequest:(XMChainRequest *)chainRequest {

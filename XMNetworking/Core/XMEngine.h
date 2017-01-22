@@ -78,9 +78,9 @@ typedef void (^XMCompletionHandler) (id _Nullable responseObject, NSError * _Nul
  */
 - (NSInteger)reachabilityStatus;
 
-///------------------
-/// @name SSL Pinning
-///------------------
+///----------------------------
+/// @name SSL Pinning for HTTPS
+///----------------------------
 
 /**
  Add host url of a server whose trust should be evaluated against the pinned SSL certificates.
@@ -95,6 +95,18 @@ typedef void (^XMCompletionHandler) (id _Nullable responseObject, NSError * _Nul
  @param cert The local pinnned certificate data.
  */
 - (void)addSSLPinningCert:(NSData *)cert;
+
+///---------------------------------------
+/// @name Two-way Authentication for HTTPS
+///---------------------------------------
+
+/**
+ Add client p12 certificate used for HTTPS Two-way Authentication.
+
+ @param p12 The PKCS#12 certificate file data.
+ @param password The special key password for PKCS#12 data.
+ */
+- (void)addTwowayAuthenticationPKCS12:(NSData *)p12 keyPassword:(NSString *)password;
 
 @end
 
