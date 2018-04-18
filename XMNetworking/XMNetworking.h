@@ -13,6 +13,5 @@
 #import "XMRequest.h"
 #import "XMCenter.h"
 #import "XMEngine.h"
-#import "AFNetworking.h"
 
 #endif /* XMNetworking_h */
