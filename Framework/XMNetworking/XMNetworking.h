@@ -16,16 +16,6 @@ FOUNDATION_EXPORT const unsigned char XMNetworkingVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <XMNetworking/PublicHeader.h>
 
-// Import public header files for AFNetworking
-#import <XMNetworking/AFURLRequestSerialization.h>
-#import <XMNetworking/AFURLResponseSerialization.h>
-#import <XMNetworking/AFSecurityPolicy.h>
-#import <XMNetworking/AFNetworkReachabilityManager.h>
-#import <XMNetworking/AFNetworkActivityIndicatorManager.h>
-#import <XMNetworking/AFURLSessionManager.h>
-#import <XMNetworking/AFHTTPSessionManager.h>
-
-// Import public header files for XMNetworking
 #import <XMNetworking/XMConst.h>
 #import <XMNetworking/XMRequest.h>
 #import <XMNetworking/XMCenter.h>

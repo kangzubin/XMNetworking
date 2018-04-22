@@ -8,9 +8,15 @@
 
 #import "XMEngine.h"
 #import "XMRequest.h"
+#import <objc/runtime.h>
+
+#if __has_include(<AFNetworking/AFNetworking.h>)
+#import <AFNetworking/AFNetworking.h>
+#import <AFNetworking/AFNetworkActivityIndicatorManager.h>
+#else
 #import "AFNetworking.h"
 #import "AFNetworkActivityIndicatorManager.h"
-#import <objc/runtime.h>
+#endif
 
 static dispatch_queue_t xm_request_completion_callback_queue() {
     static dispatch_queue_t _xm_request_completion_callback_queue;
