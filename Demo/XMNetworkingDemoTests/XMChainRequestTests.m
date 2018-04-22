@@ -122,7 +122,7 @@
             request.parameters = @{@"method": @"get"};
         }] onNext:^(XMRequest * _Nonnull request, id  _Nullable responseObject, BOOL * _Nonnull sendNext) {
             if ([responseObject[@"args"][@"method"] isEqualToString:@"get"]) {
-                request.url = @"https://kangzubin.cn/test/timeout.php"; // This interface will return in 30 seconds later.
+                request.url = @"https://kangzubin.com/test/timeout.php"; // This interface will return in 30 seconds later.
                 request.httpMethod = kXMHTTPMethodGET;
                 request.timeoutInterval = 5.0;
             } else {
@@ -159,7 +159,7 @@
             request.parameters = @{@"method": @"get"};
         }] onNext:^(XMRequest * _Nonnull request, id  _Nullable responseObject, BOOL * _Nonnull sendNext) {
             if ([responseObject[@"args"][@"method"] isEqualToString:@"get"]) {
-                request.url = @"https://kangzubin.cn/test/timeout.php"; // This interface will return in 30 seconds later.
+                request.url = @"https://kangzubin.com/test/timeout.php"; // This interface will return in 30 seconds later.
                 request.httpMethod = kXMHTTPMethodGET;
             } else {
                 *sendNext = NO;

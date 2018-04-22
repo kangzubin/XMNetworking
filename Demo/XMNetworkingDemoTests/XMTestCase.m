@@ -19,6 +19,16 @@
         config.generalHeaders = @{@"global_header": @"global header value"};
         config.consoleLog = YES;
     }];
+    
+    [XMCenter setRequestProcessBlock:^(XMRequest * _Nonnull request) {
+        
+    }];
+    [XMCenter setResponseProcessBlock:^id(XMRequest * _Nonnull request, id  _Nullable responseObject, NSError *__autoreleasing  _Nullable * _Nullable error) {
+        return nil;
+    }];
+    [XMCenter setErrorProcessBlock:^(XMRequest * _Nonnull request, NSError *__autoreleasing  _Nullable * _Nullable error) {
+        
+    }];
 }
 
 - (void)tearDown {

@@ -273,7 +273,7 @@
 - (void)testTimeOut {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Request should fail due to time out."];
     [XMCenter sendRequest:^(XMRequest * _Nonnull request) {
-        request.url = @"https://kangzubin.cn/test/timeout.php"; // This interface will return in 30 seconds later.
+        request.url = @"https://kangzubin.com/test/timeout.php"; // This interface will return in 30 seconds later.
         request.httpMethod = kXMHTTPMethodGET;
         request.timeoutInterval = 5.0;
         request.useGeneralParameters = NO;
@@ -297,7 +297,7 @@
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"Cancel block should be called."];
     
     NSString *identifier = [XMCenter sendRequest:^(XMRequest * _Nonnull request) {
-        request.url = @"https://kangzubin.cn/test/timeout.php"; // This interface will return in 30 seconds later.
+        request.url = @"https://kangzubin.com/test/timeout.php"; // This interface will return in 30 seconds later.
         request.httpMethod = kXMHTTPMethodGET;
         request.useGeneralParameters = NO;
         request.useGeneralHeaders = NO;
@@ -317,7 +317,7 @@
     
     [XMCenter cancelRequest:identifier onCancel:^(XMRequest * _Nullable request) {
         XCTAssertNotNil(request);
-        XCTAssertTrue([request.url isEqualToString:@"https://kangzubin.cn/test/timeout.php"]);
+        XCTAssertTrue([request.url isEqualToString:@"https://kangzubin.com/test/timeout.php"]);
         [expectation2 fulfill];
     }];
     

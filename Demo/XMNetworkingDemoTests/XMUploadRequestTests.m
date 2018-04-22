@@ -39,7 +39,7 @@
         request.api = @"post";
         request.requestType = kXMRequestUpload;
         [request addFormDataWithName:@"tag" fileName:@"tempImage1.jpg" mimeType:@"image/jpeg" fileData:fileData];
-        [request addFormDataWithName:@"image[]" fileName:@"tempImage2.jpg" mimeType:@"image/jpeg" fileData:fileData];
+        [request addFormDataWithName:@"image" fileName:@"tempImage2.jpg" mimeType:@"image/jpeg" fileData:fileData];
         //[request addFormDataWithName:@"file" fileURL:fileURL];
     } onProgress:^(NSProgress * _Nonnull progress) {
         // the progress block is running on the session queue.
@@ -48,6 +48,7 @@
         }
     } onSuccess:^(id  _Nullable responseObject) {
         XCTAssertNotNil(responseObject);
+        XCTAssertTrue(responseObject[@"files"][@"tag"] != nil);
         XCTAssertTrue(responseObject[@"files"][@"image"] != nil);
     } onFailure:^(NSError * _Nullable error) {
         XCTAssertNil(error);

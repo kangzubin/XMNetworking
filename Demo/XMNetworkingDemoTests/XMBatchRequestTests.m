@@ -73,7 +73,7 @@
         request1.parameters = @{@"method": @"get"};
         
         XMRequest *request2 = [XMRequest request];
-        request2.url = @"https://kangzubin.cn/test/timeout.php"; // This interface will return in 30 seconds later.
+        request2.url = @"https://kangzubin.com/test/timeout.php"; // This interface will return in 30 seconds later.
         request2.httpMethod = kXMHTTPMethodGET;
         request2.timeoutInterval = 5.0;
         
@@ -115,7 +115,7 @@
         request1.parameters = @{@"method": @"get"};
         
         XMRequest *request2 = [XMRequest request];
-        request2.url = @"https://kangzubin.cn/test/timeout.php"; // This interface will return in 30 seconds later.
+        request2.url = @"https://kangzubin.com/test/timeout.php"; // This interface will return in 30 seconds later.
         request2.httpMethod = kXMHTTPMethodGET;
         
         [batchRequest.requestArray addObject:request1];
