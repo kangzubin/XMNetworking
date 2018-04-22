@@ -67,6 +67,13 @@ typedef void (^XMCompletionHandler) (id _Nullable responseObject, NSError * _Nul
  */
 - (nullable XMRequest *)getRequestByIdentifier:(NSString *)identifier;
 
+/**
+ Method to set max concurrent operation count.
+ 
+ @param count The max concurrent operation count.
+ */
+- (void)setConcurrentOperationCount:(NSInteger)count;
+
 ///--------------------------
 /// @name Network Reachablity
 ///--------------------------

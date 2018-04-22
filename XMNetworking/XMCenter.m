@@ -21,6 +21,7 @@
 
 @property (nonatomic, copy) XMCenterResponseProcessBlock responseProcessHandler;
 @property (nonatomic, copy) XMCenterRequestProcessBlock requestProcessHandler;
+@property (nonatomic, copy) XMCenterErrorProcessBlock errorProcessHandler;
 
 @end
 
@@ -86,6 +87,10 @@
     self.responseProcessHandler = block;
 }
 
+- (void)setErrorProcessBlock:(XMCenterErrorProcessBlock)block {
+    self.errorProcessHandler = block;
+}
+
 - (void)setGeneralHeaderValue:(NSString *)value forField:(NSString *)field {
     [self.generalHeaders setValue:value forKey:field];
 }
@@ -141,7 +146,6 @@
                 onFailure:(nullable XMFailureBlock)failureBlock
                onFinished:(nullable XMFinishedBlock)finishedBlock {
     XMRequest *request = [XMRequest request];
-    XM_SAFE_BLOCK(self.requestProcessHandler, request);
     XM_SAFE_BLOCK(configBlock, request);
     
     [self xm_processRequest:request onProgress:progressBlock onSuccess:successBlock onFailure:failureBlock onFinished:finishedBlock];
@@ -283,6 +287,10 @@
     return self.engine.reachabilityStatus != 0;
 }
 
+- (XMNetworkConnectionType)networkConnectionType {
+    return self.engine.reachabilityStatus;
+}
+
 #pragma mark - Public Class Methods for XMCenter
 
 + (void)setupConfig:(void(^)(XMConfig *config))block {
@@ -295,6 +303,10 @@
 
 + (void)setResponseProcessBlock:(XMCenterResponseProcessBlock)block {
     [[XMCenter defaultCenter] setResponseProcessBlock:block];
+}
+
++ (void)setErrorProcessBlock:(XMCenterErrorProcessBlock)block {
+    [[XMCenter defaultCenter] setErrorProcessBlock:block];
 }
 
 + (void)setGeneralHeaderValue:(NSString *)value forField:(NSString *)field {
@@ -385,6 +397,10 @@
 
 + (BOOL)isNetworkReachable {
     return [[XMCenter defaultCenter] isNetworkReachable];
+}
+
++ (XMNetworkConnectionType)networkConnectionType {
+    return [[XMCenter defaultCenter] networkConnectionType];
 }
 
 #pragma mark -
@@ -488,6 +504,8 @@
             request.url = request.server;
         }
     }
+    
+    XM_SAFE_BLOCK(self.requestProcessHandler, request);
     NSAssert(request.url.length > 0, @"The request url can't be null.");
 }
 
@@ -516,7 +534,10 @@
     
     NSError *processError = nil;
     // custom processing the response data.
-    XM_SAFE_BLOCK(self.responseProcessHandler, request, responseObject, &processError);
+    id newResponseObject = XM_SAFE_BLOCK(self.responseProcessHandler, request, responseObject, &processError);
+    if (newResponseObject) {
+        responseObject = newResponseObject;
+    }
     if (processError) {
         [self xm_failureWithError:processError forRequest:request];
         return;
@@ -557,6 +578,8 @@
     if (self.consoleLog) {
         NSLog(@"\n=========== [XMResponse Error] ===========\nrequest url: %@ \nerror info: \n%@\n==========================================\n", request.url, error);
     }
+    
+    XM_SAFE_BLOCK(self.errorProcessHandler, request, &error);
     
     if (request.retryCount > 0) {
         request.retryCount --;

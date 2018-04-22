@@ -84,8 +84,8 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     dispatch_semaphore_t _lock;
 }
 
-@property (nonatomic, strong) AFHTTPSessionManager *sessionManager;
-@property (nonatomic, strong) AFHTTPSessionManager *securitySessionManager;
+@property (nonatomic, strong) AFURLSessionManager *sessionManager;
+@property (nonatomic, strong) AFURLSessionManager *securitySessionManager;
 
 @property (nonatomic, strong) AFHTTPRequestSerializer *afHTTPRequestSerializer;
 @property (nonatomic, strong) AFJSONRequestSerializer *afJSONRequestSerializer;
@@ -199,6 +199,14 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     return request;
 }
 
+- (void)setConcurrentOperationCount:(NSInteger)count {
+    if (count < 1) {
+        count = 1;
+    }
+    self.sessionManager.operationQueue.maxConcurrentOperationCount = count;
+    self.securitySessionManager.operationQueue.maxConcurrentOperationCount = count;
+}
+
 - (NSInteger)reachabilityStatus {
     return [AFNetworkReachabilityManager sharedManager].networkReachabilityStatus;
 }
@@ -224,7 +232,8 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
         certSet = [NSMutableSet set];
     }
     [certSet addObject:cert];
-    [self.securitySessionManager.securityPolicy setPinnedCertificates:certSet];}
+    [self.securitySessionManager.securityPolicy setPinnedCertificates:certSet];
+}
 
 - (void)addTwowayAuthenticationPKCS12:(NSData *)p12 keyPassword:(NSString *)password {
     NSParameterAssert(p12);
@@ -301,7 +310,7 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     }
     NSAssert(httpMethod.length > 0, @"The HTTP method not found.");
     
-    AFHTTPSessionManager *sessionManager = [self xm_getSessionManager:request];
+    AFURLSessionManager *sessionManager = [self xm_getSessionManager:request];
     AFHTTPRequestSerializer *requestSerializer = [self xm_getRequestSerializer:request];
     
     NSError *serializationError = nil;
@@ -324,14 +333,16 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     NSURLSessionDataTask *dataTask = nil;
     __weak __typeof(self)weakSelf = self;
     dataTask = [sessionManager dataTaskWithRequest:urlRequest
-                                      completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        [strongSelf xm_processResponse:response
-                                object:responseObject
-                                 error:error
-                               request:request
-                     completionHandler:completionHandler];
-    }];
+                                    uploadProgress:nil
+                                  downloadProgress:nil
+                                 completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+                                     __strong __typeof(weakSelf)strongSelf = weakSelf;
+                                     [strongSelf xm_processResponse:response
+                                                             object:responseObject
+                                                              error:error
+                                                            request:request
+                                                  completionHandler:completionHandler];
+                                 }];
     
     [self xm_setIdentifierForReqeust:request taskIdentifier:dataTask.taskIdentifier sessionManager:sessionManager];
     [dataTask setBindedRequest:request];
@@ -341,7 +352,7 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
 - (void)xm_uploadTaskWithRequest:(XMRequest *)request
                completionHandler:(XMCompletionHandler)completionHandler {
     
-    AFHTTPSessionManager *sessionManager = [self xm_getSessionManager:request];
+    AFURLSessionManager *sessionManager = [self xm_getSessionManager:request];
     AFHTTPRequestSerializer *requestSerializer = [self xm_getRequestSerializer:request];
     
     __block NSError *serializationError = nil;
@@ -385,8 +396,8 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     NSURLSessionUploadTask *uploadTask = nil;
     __weak __typeof(self)weakSelf = self;
     uploadTask = [sessionManager uploadTaskWithStreamedRequest:urlRequest
-                                                           progress:request.progressBlock
-                                                  completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+                                                      progress:request.progressBlock
+                                             completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         [strongSelf xm_processResponse:response
                                 object:responseObject
@@ -418,16 +429,17 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     }
     
     NSURLSessionDownloadTask *downloadTask = nil;
-    AFHTTPSessionManager *sessionManager = [self xm_getSessionManager:request];
+    AFURLSessionManager *sessionManager = [self xm_getSessionManager:request];
     downloadTask = [sessionManager downloadTaskWithRequest:urlRequest
-                                                       progress:request.progressBlock
-                                                    destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
-                                                        return downloadFileSavePath;
-                                                    } completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
-                                                        if (completionHandler) {
-                                                            completionHandler(filePath, error);
-                                                        }
-                                                    }];
+                                                  progress:request.progressBlock
+                                               destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
+                                                   return downloadFileSavePath;
+                                               }
+                                         completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
+                                                    if (completionHandler) {
+                                                        completionHandler(filePath, error);
+                                                    }
+                                         }];
     
     [self xm_setIdentifierForReqeust:request taskIdentifier:downloadTask.taskIdentifier sessionManager:sessionManager];
     [downloadTask setBindedRequest:request];
@@ -467,7 +479,7 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
 
 - (void)xm_setIdentifierForReqeust:(XMRequest *)request
                     taskIdentifier:(NSUInteger)taskIdentifier
-                    sessionManager:(AFHTTPSessionManager *)sessionManager {
+                    sessionManager:(AFURLSessionManager *)sessionManager {
     NSString *identifier = nil;
     if ([sessionManager isEqual:self.sessionManager]) {
         identifier = [NSString stringWithFormat:@"+%lu", (unsigned long)taskIdentifier];
@@ -498,7 +510,7 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     return NO;
 }
 
-- (AFHTTPSessionManager *)xm_getSessionManager:(XMRequest *)request {
+- (AFURLSessionManager *)xm_getSessionManager:(XMRequest *)request {
     if ([self xm_shouldSSLPinningWithURL:request.url]) {
         return self.securitySessionManager;
     } else {
@@ -536,10 +548,9 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
 
 #pragma mark - Accessor
 
-- (AFHTTPSessionManager *)sessionManager {
+- (AFURLSessionManager *)sessionManager {
     if (!_sessionManager) {
-        _sessionManager = [AFHTTPSessionManager manager];
-        _sessionManager.requestSerializer = self.afHTTPRequestSerializer;
+        _sessionManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:nil];
         _sessionManager.responseSerializer = self.afHTTPResponseSerializer;
         _sessionManager.operationQueue.maxConcurrentOperationCount = 5;
         _sessionManager.completionQueue = xm_request_completion_callback_queue();
@@ -547,10 +558,9 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     return _sessionManager;
 }
 
-- (AFHTTPSessionManager *)securitySessionManager {
+- (AFURLSessionManager *)securitySessionManager {
     if (!_securitySessionManager) {
-        _securitySessionManager = [AFHTTPSessionManager manager];
-        _securitySessionManager.requestSerializer = self.afHTTPRequestSerializer;
+        _securitySessionManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:nil];
         _securitySessionManager.responseSerializer = self.afHTTPResponseSerializer;
         _securitySessionManager.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
         _securitySessionManager.operationQueue.maxConcurrentOperationCount = 5;

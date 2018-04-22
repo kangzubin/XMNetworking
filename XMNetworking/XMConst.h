@@ -57,6 +57,16 @@ typedef NS_ENUM(NSInteger, XMResponseSerializerType) {
     kXMResponseSerializerXML    = 3,    //!< Validates and decodes XML responses as an `NSXMLParser` objects.
 };
 
+/**
+ Network connection type enum
+ */
+typedef NS_ENUM(NSInteger, XMNetworkConnectionType) {
+    kXMNetworkConnectionTypeUnknown          = -1,
+    kXMNetworkConnectionTypeNotReachable     = 0,
+    kXMNetworkConnectionTypeViaWWAN          = 1,
+    kXMNetworkConnectionTypeViaWiFi          = 2,
+};
+
 ///------------------------------
 /// @name XMRequest Config Blocks
 ///------------------------------
@@ -102,7 +112,15 @@ typedef void (^XMCenterRequestProcessBlock)(XMRequest *request);
  @param responseObject The response data return from server.
  @param error The error that occurred while the response data don't conforms to your own business logic.
  */
-typedef void (^XMCenterResponseProcessBlock)(XMRequest *request, id _Nullable responseObject, NSError * _Nullable __autoreleasing *error);
+typedef id (^XMCenterResponseProcessBlock)(XMRequest *request, id _Nullable responseObject, NSError * _Nullable __autoreleasing *error);
+
+/**
+ The custom error process block for all XMRequests invoked by XMCenter.
+ 
+ @param request The current XMRequest object.
+ @param error The error that occurred while the response data don't conforms to your own business logic.
+ */
+typedef void (^XMCenterErrorProcessBlock)(XMRequest *request, NSError * _Nullable __autoreleasing *error);
 
 NS_ASSUME_NONNULL_END
 

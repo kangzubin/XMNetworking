@@ -138,6 +138,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setResponseProcessBlock:(XMCenterResponseProcessBlock)block;
 
 /**
+ Method to set custom error processing block for XMCenter.
+ 
+ @param block The custom processing block (`XMCenterErrorProcessBlock`).
+ */
+- (void)setErrorProcessBlock:(XMCenterErrorProcessBlock)block;
+
+/**
  Sets the value for the general HTTP headers of XMCenter, If value is `nil`, it will remove the existing value for that header field.
  
  @param value The value to set for the specified header, or `nil`.
@@ -336,6 +343,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)isNetworkReachable;
 
+/**
+ Method to get current network connection type.
+ 
+ @return The network connection type, see `XMNetworkConnectionType` for details.
+ */
+- (XMNetworkConnectionType)networkConnectionType;
+
 ///--------------------------------
 /// @name Class Method for XMCenter
 ///--------------------------------
@@ -347,6 +361,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)setupConfig:(void(^)(XMConfig *config))block;
 + (void)setRequestProcessBlock:(XMCenterRequestProcessBlock)block;
 + (void)setResponseProcessBlock:(XMCenterResponseProcessBlock)block;
++ (void)setErrorProcessBlock:(XMCenterErrorProcessBlock)block;
 + (void)setGeneralHeaderValue:(nullable NSString *)value forField:(NSString *)field;
 + (void)setGeneralParameterValue:(nullable id)value forKey:(NSString *)key;
 
@@ -403,6 +418,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (nullable id)getRequest:(NSString *)identifier;
 
 + (BOOL)isNetworkReachable;
+
++ (XMNetworkConnectionType)networkConnectionType;
 
 #pragma mark -
 
