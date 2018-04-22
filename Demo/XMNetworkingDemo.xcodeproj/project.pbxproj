@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B16DFA7208B7E4B00BF7AC5 /* NetworkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B16DFA6208B7E4B00BF7AC5 /* NetworkManager.m */; };
+		4B16DFAA208B7FFB00BF7AC5 /* TipSetTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B16DFA9208B7FFB00BF7AC5 /* TipSetTableViewCell.m */; };
+		4B16DFAD208B89F100BF7AC5 /* TipSetItemModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B16DFAC208B89F100BF7AC5 /* TipSetItemModel.m */; };
+		4B16DFB0208C94E500BF7AC5 /* SearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B16DFAF208C94E500BF7AC5 /* SearchViewController.m */; };
+		4B16DFB6208CD67A00BF7AC5 /* app.kangzubin.com.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4B16DFB5208CD67A00BF7AC5 /* app.kangzubin.com.cer */; };
 		4B4BBE6F1E30AC5B0044BCA8 /* httpbin.org.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4B4BBE6D1E30A7CC0044BCA8 /* httpbin.org.cer */; };
 		4B92A5241E10C6430093EBD8 /* XMTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5231E10C6430093EBD8 /* XMTestCase.m */; };
 		4B92A5261E10E5720093EBD8 /* XMNormalRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5251E10E5720093EBD8 /* XMNormalRequestTests.m */; };
@@ -16,10 +21,9 @@
 		4B92A52E1E123C5E0093EBD8 /* XMBatchRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A52D1E123C5E0093EBD8 /* XMBatchRequestTests.m */; };
 		4B92A5301E123C800093EBD8 /* XMChainRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A52F1E123C800093EBD8 /* XMChainRequestTests.m */; };
 		4B92A5321E123CC10093EBD8 /* XMCenterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B92A5311E123CC10093EBD8 /* XMCenterTests.m */; };
+		4BD09BC62087A789003591F4 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BD09BC52087A789003591F4 /* MainViewController.m */; };
 		4BF800CF1DFED15C00999C54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800CE1DFED15C00999C54 /* main.m */; };
 		4BF800D21DFED15C00999C54 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800D11DFED15C00999C54 /* AppDelegate.m */; };
-		4BF800D51DFED15C00999C54 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF800D41DFED15C00999C54 /* ViewController.m */; };
-		4BF800D81DFED15C00999C54 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4BF800D61DFED15C00999C54 /* Main.storyboard */; };
 		4BF800DA1DFED15C00999C54 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4BF800D91DFED15C00999C54 /* Assets.xcassets */; };
 		4BF800DD1DFED15C00999C54 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4BF800DB1DFED15C00999C54 /* LaunchScreen.storyboard */; };
 		4BF801101DFED40000999C54 /* XMRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF8010F1DFED40000999C54 /* XMRequest.m */; };
@@ -39,6 +43,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4B16DFA5208B7E4B00BF7AC5 /* NetworkManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NetworkManager.h; sourceTree = "<group>"; };
+		4B16DFA6208B7E4B00BF7AC5 /* NetworkManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NetworkManager.m; sourceTree = "<group>"; };
+		4B16DFA8208B7FFB00BF7AC5 /* TipSetTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TipSetTableViewCell.h; sourceTree = "<group>"; };
+		4B16DFA9208B7FFB00BF7AC5 /* TipSetTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TipSetTableViewCell.m; sourceTree = "<group>"; };
+		4B16DFAB208B89F100BF7AC5 /* TipSetItemModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TipSetItemModel.h; sourceTree = "<group>"; };
+		4B16DFAC208B89F100BF7AC5 /* TipSetItemModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TipSetItemModel.m; sourceTree = "<group>"; };
+		4B16DFAE208C94E500BF7AC5 /* SearchViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SearchViewController.h; sourceTree = "<group>"; };
+		4B16DFAF208C94E500BF7AC5 /* SearchViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SearchViewController.m; sourceTree = "<group>"; };
+		4B16DFB5208CD67A00BF7AC5 /* app.kangzubin.com.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = app.kangzubin.com.cer; sourceTree = "<group>"; };
 		4B4BBE6D1E30A7CC0044BCA8 /* httpbin.org.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = httpbin.org.cer; sourceTree = "<group>"; };
 		4B92A5221E10C6430093EBD8 /* XMTestCase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMTestCase.h; sourceTree = "<group>"; };
 		4B92A5231E10C6430093EBD8 /* XMTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMTestCase.m; sourceTree = "<group>"; };
@@ -49,13 +62,12 @@
 		4B92A52D1E123C5E0093EBD8 /* XMBatchRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMBatchRequestTests.m; sourceTree = "<group>"; };
 		4B92A52F1E123C800093EBD8 /* XMChainRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMChainRequestTests.m; sourceTree = "<group>"; };
 		4B92A5311E123CC10093EBD8 /* XMCenterTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMCenterTests.m; sourceTree = "<group>"; };
+		4BD09BC42087A789003591F4 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
+		4BD09BC52087A789003591F4 /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		4BF800CA1DFED15C00999C54 /* XMNetworkingDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XMNetworkingDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BF800CE1DFED15C00999C54 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		4BF800D01DFED15C00999C54 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		4BF800D11DFED15C00999C54 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		4BF800D31DFED15C00999C54 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		4BF800D41DFED15C00999C54 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		4BF800D71DFED15C00999C54 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4BF800D91DFED15C00999C54 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4BF800DC1DFED15C00999C54 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4BF800DE1DFED15C00999C54 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -128,8 +140,16 @@
 			children = (
 				4BF800D01DFED15C00999C54 /* AppDelegate.h */,
 				4BF800D11DFED15C00999C54 /* AppDelegate.m */,
-				4BF800D31DFED15C00999C54 /* ViewController.h */,
-				4BF800D41DFED15C00999C54 /* ViewController.m */,
+				4B16DFA5208B7E4B00BF7AC5 /* NetworkManager.h */,
+				4B16DFA6208B7E4B00BF7AC5 /* NetworkManager.m */,
+				4B16DFAB208B89F100BF7AC5 /* TipSetItemModel.h */,
+				4B16DFAC208B89F100BF7AC5 /* TipSetItemModel.m */,
+				4B16DFA8208B7FFB00BF7AC5 /* TipSetTableViewCell.h */,
+				4B16DFA9208B7FFB00BF7AC5 /* TipSetTableViewCell.m */,
+				4BD09BC42087A789003591F4 /* MainViewController.h */,
+				4BD09BC52087A789003591F4 /* MainViewController.m */,
+				4B16DFAE208C94E500BF7AC5 /* SearchViewController.h */,
+				4B16DFAF208C94E500BF7AC5 /* SearchViewController.m */,
 				4BF800CD1DFED15C00999C54 /* Supporting Files */,
 			);
 			path = XMNetworkingDemo;
@@ -140,8 +160,8 @@
 			children = (
 				4BF800CE1DFED15C00999C54 /* main.m */,
 				4BF800DE1DFED15C00999C54 /* Info.plist */,
+				4B16DFB5208CD67A00BF7AC5 /* app.kangzubin.com.cer */,
 				4BF800D91DFED15C00999C54 /* Assets.xcassets */,
-				4BF800D61DFED15C00999C54 /* Main.storyboard */,
 				4BF800DB1DFED15C00999C54 /* LaunchScreen.storyboard */,
 			);
 			name = "Supporting Files";
@@ -234,16 +254,17 @@
 		4BF800C21DFED15C00999C54 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0920;
+				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = XMNetworking;
 				TargetAttributes = {
 					4BF800C91DFED15C00999C54 = {
 						CreatedOnToolsVersion = 8.1;
-						ProvisioningStyle = Manual;
+						DevelopmentTeam = SAE2CQZL3Y;
+						ProvisioningStyle = Automatic;
 					};
 					4BF800E21DFED15C00999C54 = {
 						CreatedOnToolsVersion = 8.1;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						TestTargetID = 4BF800C91DFED15C00999C54;
 					};
 				};
@@ -272,9 +293,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B16DFB6208CD67A00BF7AC5 /* app.kangzubin.com.cer in Resources */,
 				4BF800DD1DFED15C00999C54 /* LaunchScreen.storyboard in Resources */,
 				4BF800DA1DFED15C00999C54 /* Assets.xcassets in Resources */,
-				4BF800D81DFED15C00999C54 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,10 +338,14 @@
 			files = (
 				4BF801101DFED40000999C54 /* XMRequest.m in Sources */,
 				4BF801131DFED44300999C54 /* XMCenter.m in Sources */,
-				4BF800D51DFED15C00999C54 /* ViewController.m in Sources */,
+				4B16DFB0208C94E500BF7AC5 /* SearchViewController.m in Sources */,
+				4B16DFAA208B7FFB00BF7AC5 /* TipSetTableViewCell.m in Sources */,
 				4BF800D21DFED15C00999C54 /* AppDelegate.m in Sources */,
+				4B16DFAD208B89F100BF7AC5 /* TipSetItemModel.m in Sources */,
+				4BD09BC62087A789003591F4 /* MainViewController.m in Sources */,
 				4BF800CF1DFED15C00999C54 /* main.m in Sources */,
 				4BF801161DFED49500999C54 /* XMEngine.m in Sources */,
+				4B16DFA7208B7E4B00BF7AC5 /* NetworkManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,14 +374,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		4BF800D61DFED15C00999C54 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				4BF800D71DFED15C00999C54 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		4BF800DB1DFED15C00999C54 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -381,6 +398,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -388,6 +406,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -415,7 +434,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -435,6 +454,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -442,6 +462,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -463,7 +484,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -475,11 +496,15 @@
 			baseConfigurationReference = 4F2F058D11AEAA8CCBA69787 /* Pods-XMNetworkingDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SAE2CQZL3Y;
 				INFOPLIST_FILE = XMNetworkingDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.XMNetworking;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kangzubin.XMNetworkingDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -488,11 +513,15 @@
 			baseConfigurationReference = A0DF4180EF91D6CD7F45799D /* Pods-XMNetworkingDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SAE2CQZL3Y;
 				INFOPLIST_FILE = XMNetworkingDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.XMNetworking;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kangzubin.XMNetworkingDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
@@ -500,10 +529,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = XMNetworkingDemoTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.XMNetworkingDemoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/XMNetworkingDemo.app/XMNetworkingDemo";
 			};
 			name = Debug;
@@ -512,10 +544,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = XMNetworkingDemoTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.XMNetworkingDemoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/XMNetworkingDemo.app/XMNetworkingDemo";
 			};
 			name = Release;
