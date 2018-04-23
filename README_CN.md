@@ -1,14 +1,16 @@
 # XMNetworking
 
-XMNetworking 是一个轻量的、简单易用但功能强大的网络库，基于 AFNetworking 3.0 封装。
+**[English Document](https://github.com/kangzubin/XMNetworking)**
 
-其中，`XM` 前缀是我们团队 [Xcode-Men](http://www.jianshu.com/users/d509cc369c78/) 的缩写。[英文文档](https://github.com/kangzubin/XMNetworking)
+XMNetworking 是一个轻量的、简单易用但功能强大的网络库，基于 AFNetworking 3.0+ 封装。
+
+其中，`XM` 前缀是我们团队 [Xcode-Men](http://www.jianshu.com/users/d509cc369c78/) 的缩写。
 
 ![Platform](https://img.shields.io/badge/platform-iOS-red.svg) ![Language](https://img.shields.io/badge/language-Objective--C-orange.svg) [![CocoaPods](https://img.shields.io/badge/pod-v1.0.2-blue.svg)](http://cocoadocs.org/docsets/XMNetworking/) [![Carthage](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://github.com/kangzubin/XMNetworking/blob/master/LICENSE)
 
 ## 简介
 
-![XMNetworking](http://img.kangzubin.cn/xmnetworking/XMNetworking.png) 
+![XMNetworking](https://github.com/kangzubin/XMNetworking/Image/XMNetworking.png) 
 
 如上图所示，XMNetworking 采用中心化的设计思想，由 `XMCenter` 统一发起并管理所有的 `XMRequest` 请求，并可通过 `XMCenter` 给所有请求配置回调线程、公共 Server URL、Header、Parameter 等信息，同时也可以 Block 注入的方式给对所有请求做预处理以及实现自定义的请求响应结果处理逻辑，如数据模型转换、业务错误码判断、网络缓存等。另外增加了 `XMEgine` 这一层是为了隔离底层第三方库依赖，便于以后切换其他底层网络库或自己实现底层逻辑。
 
@@ -34,10 +36,10 @@ XMNetworking 是一个轻量的、简单易用但功能强大的网络库，基�
 在你工程的 `Podfile` 文件中添加如下一行，并执行 `pod install` 或 `pod update`。
 
 ```bash
-pod 'XMNetworking'
+pod 'XMNetworking', '~> 1.1.0'
 ```
 
-**注意：** `XMNetworking` 已经包含了 `AFNetworking` 3.1.0 的源代码，所以你工程里的 `Podfile` 文件**不能**再添加 `pod AFNetworking` 去导入 `AFNetworking`，否则会有冲突！
+**注意：** `XMNetworking` 会自动依赖 `AFNetworking` 3.0+ ，所以你工程里的 `Podfile` 文件**无需**再添加 `pod AFNetworking` 去导入 `AFNetworking`。
 
 ### Carthage (只支持 iOS 8+)
 
@@ -53,16 +55,15 @@ $ brew install carthage
 成功安装完 Carthage 后，在你工程的 `Cartfile` 文件中添加如下一行：
 
 ```ogdl
-github "kangzubin/XMNetworking"
+github "AFNetworking/AFNetworking" ~> 3.0
+github "kangzubin/XMNetworking" ~> 1.1.0
 ```
 
-然后执行 `carthage update --platform ios` 命令生成 framework 包，并把生成的 `XMNetworking.framework` 拖拽到你的工程中。
-
-**注意:** `XMNetworking` 已经包含了 `AFNetworking` 3.1.0 的源代码，所以你**无需**通过 Carthage 生成 `AFNetworking.framework` 导到你工程中，否则会有冲突！
+然后执行 `carthage update --platform ios` 命令生成 framework 包，并把生成的 `XMNetworking.framework` 和 `AFNetworking.framework` 拖拽到你的工程中。
 
 ### 手动安装
 
-下载 `XMNetworking` 子文件夹的所有内容，并把其中的源文件添加（拖放）到你的工程中。
+下载 `XMNetworking` 子文件夹的内容以及 `AFNetworking` 的代码，并把它们的源文件添加（拖放）到你的工程中。
 
 ## 使用教程
 
@@ -120,17 +121,11 @@ github "kangzubin/XMNetworking"
 ```objc
 [XMCenter sendRequest:^(XMRequest *request) {
     request.url = @"http://example.com/v1/foo/bar";
-    //request.server = @"http://example.com/v1/";
-    //request.api = @"foo/bar";
-    request.parameters = @{@"param1": @"value1", @"param2": @"value2"};
-    request.headers = @{@"User-Agent": @"Custom User Agent"};
     request.httpMethod = kXMHTTPMethodGET;
 } onSuccess:^(id responseObject) {
    NSLog(@"onSuccess: %@", responseObject);
 } onFailure:^(NSError *error) {
    NSLog(@"onFailure: %@", error);
-} onFinished:^(id responseObject, NSError *error) {
-   NSLog(@"onFinished");
 }];
 ```
 
@@ -161,6 +156,8 @@ request.api = @"foo/bar";
    NSLog(@"onSuccess: %@", responseObject);
 } onFailure:^(NSError *error) {
    NSLog(@"onFailure: %@", error);
+} onFinished:^(id responseObject, NSError *error) {
+   NSLog(@"onFinished");
 }];
 ```
 
@@ -246,6 +243,7 @@ typedef NS_ENUM(NSInteger, XMResponseSerializerType) {
 详见 `AFURLRequestSerialization.h` 和 `AFURLResponseSerialization.h` 获取更多细节。
 
 ### 预处理和后处理插件
+
 #### 请求预处理
 你可以通过 `[XMCenter setRequestProcessBlock:...]` 设置 XMCenter 的预处理插件，在这里给所有请求做统一处理，另外需要注意的是，这个 `requestProcessBlock` 只对普通/上传/下载的请求有效，而对于批量请求和链式请求中的 `XMRequest` 对象，则不会走这个逻辑。
 
@@ -262,13 +260,24 @@ typedef NS_ENUM(NSInteger, XMResponseSerializerType) {
 
 通常地，一个请求成功结束时，会执行 success block，当有错误发生时，执行 failure block。然而，开发中更常见的情况是，即使是一个请求成功结束，我们也需要进一步处理，比如验证响应结果数据、判断与服务端商量好的业务错误码类型等，再决定执行 success block 还是 failure block。
 
-现在，你可以调用 `[XMCenter setResponseProcessBlock:...]` 方法以 Block 注入的方式设置自定义的处理逻辑，当请求成功结束时，这个 Block 会在 success block 被执行前调用，如果传入 `*error` 参数被赋值，则接下来会执行 failure block。
+现在，你可以调用 `[XMCenter setResponseProcessBlock:...]` 方法以 Block 注入的方式设置自定义的处理逻辑，当请求成功结束时，这个 Block 会在 success block 被执行前调用，如果传入 `*error` 参数被赋值，则接下来会执行 failure block。此外，**你可以通过 Block 返回值修改的 `responseObject` 的值，即如果此 Block 的返回值不会空，则 `responseObject` 会被替换。**
 
 **在这里你可以对全局请求统一做业务错误码判断、数据模型转换、网络缓存等操作！**
 
 ```objc
-[XMCenter setResponseProcessBlock:^(XMRequest *request, id responseObject, NSError *__autoreleasing *error) {
+[XMCenter setResponseProcessBlock:^id(XMRequest *request, id responseObject, NSError *__autoreleasing *error) {
     // 自定义响应结果处理逻辑，如果 `*error` 被赋值，则接下来会执行 failure block。
+    return nil; // or return a new object to reset value for responseObject
+}];
+```
+
+#### 错误信息统一过滤
+
+你可以在 `[XMCenter setErrorProcessBlock:...]` 方法中对全局网络请求的错误做统一的过滤处理。
+
+```objc
+[XMCenter setErrorProcessBlock:^(XMRequest *request, NSError *__autoreleasing * error) {
+   // 比如对不同的错误码统一错误提示等
 }];
 ```
 
@@ -361,12 +370,14 @@ sleep(2);
 
 我们提供了两种方法用于获取网络的可连接性，分别如下：
 
+* 该方法会返回一个 Bool 值用于表示当前网络是否可连接。
 ```objc
 [[XMCenter defaultCenter] isNetworkReachable];
-// 该方法会返回一个 Bool 值用于表示当前网络是否可连接。
+```
 
-[[XMEngine sharedEngine] reachabilityStatus]; 
-// 该方法会返回一个当前网络的状态值，-1 表示 `Unknown`，0 表示 `NotReachable，1 表示 `WWAN`，2 表示 `WiFi`	
+* 该方法会返回一个当前网络的状态值（`XMNetworkConnectionType` 枚举），-1 表示 `Unknown`，0 表示 `NotReachable`，1 表示 `WWAN`，2 表示 `WiFi`。
+```objc
+[[XMCenter defaultCenter] networkConnectionType]; 
 ```
 
 详见 `AFNetworkReachabilityManager` 获取更多细节.
@@ -404,13 +415,13 @@ XMNetworking 包含了一系列单元测试，用于验证网络请求的正确�
 
 XMNetworking 的代码结构非常简洁和紧凑，只包含了 4 个核心文件：`XMConst.h` 用于定义全局常量枚举和 Block，`XMRequest`，`XMCenter` 和 `XMEngine` 则是核心类的声明和实现，具体的代码结构如下图所示：
 
-![XMNetworking Structure](http://img.kangzubin.cn/xmnetworking/XMNetworking-structure.png)
+![XMNetworking Structure](https://github.com/kangzubin/XMNetworking/Image/XMNetworking-structure.png)
 
 ## 待完善
 
 * 支持断点下载
 * 支持网络层缓存
-* 兼容测试支持 tvOS/watchOS/OS X
+* 兼容测试支持 tvOS/watchOS/macOS
 * 更加强大的自定义模型转换
 * 实现一套可扩展的插件机制，便于 XMNetworking 增加新功能
 
