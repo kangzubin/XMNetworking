@@ -10,7 +10,7 @@ XMNetworking 是一个轻量的、简单易用但功能强大的网络库，基�
 
 ## 简介
 
-![XMNetworking](https://github.com/kangzubin/XMNetworking/Image/XMNetworking.png) 
+![XMNetworking](https://github.com/kangzubin/XMNetworking/blob/master/Image/XMNetworking.png) 
 
 如上图所示，XMNetworking 采用中心化的设计思想，由 `XMCenter` 统一发起并管理所有的 `XMRequest` 请求，并可通过 `XMCenter` 给所有请求配置回调线程、公共 Server URL、Header、Parameter 等信息，同时也可以 Block 注入的方式给对所有请求做预处理以及实现自定义的请求响应结果处理逻辑，如数据模型转换、业务错误码判断、网络缓存等。另外增加了 `XMEgine` 这一层是为了隔离底层第三方库依赖，便于以后切换其他底层网络库或自己实现底层逻辑。
 
@@ -415,7 +415,7 @@ XMNetworking 包含了一系列单元测试，用于验证网络请求的正确�
 
 XMNetworking 的代码结构非常简洁和紧凑，只包含了 4 个核心文件：`XMConst.h` 用于定义全局常量枚举和 Block，`XMRequest`，`XMCenter` 和 `XMEngine` 则是核心类的声明和实现，具体的代码结构如下图所示：
 
-![XMNetworking Structure](https://github.com/kangzubin/XMNetworking/Image/XMNetworking-structure.png)
+![XMNetworking Structure](https://github.com/kangzubin/XMNetworking/blob/master/Image/XMNetworking-structure.png)
 
 ## 待完善
 
