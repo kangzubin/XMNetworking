@@ -29,6 +29,8 @@
 		4BF801101DFED40000999C54 /* XMRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF8010F1DFED40000999C54 /* XMRequest.m */; };
 		4BF801131DFED44300999C54 /* XMCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF801121DFED44300999C54 /* XMCenter.m */; };
 		4BF801161DFED49500999C54 /* XMEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF801151DFED49500999C54 /* XMEngine.m */; };
+		897281C4209C926D001799A9 /* YYFPSLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 897281C1209C926D001799A9 /* YYFPSLabel.m */; };
+		897281C5209C926D001799A9 /* YYWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 897281C3209C926D001799A9 /* YYWeakProxy.m */; };
 		9017F63AE450E7282A414025 /* libPods-XMNetworkingDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DDAEF2FD9EBFD973FD5002C /* libPods-XMNetworkingDemo.a */; };
 /* End PBXBuildFile section */
 
@@ -83,6 +85,10 @@
 		4BF801151DFED49500999C54 /* XMEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMEngine.m; sourceTree = "<group>"; };
 		4F2F058D11AEAA8CCBA69787 /* Pods-XMNetworkingDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMNetworkingDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMNetworkingDemo/Pods-XMNetworkingDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		6DDAEF2FD9EBFD973FD5002C /* libPods-XMNetworkingDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-XMNetworkingDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		897281C0209C926D001799A9 /* YYFPSLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YYFPSLabel.h; sourceTree = "<group>"; };
+		897281C1209C926D001799A9 /* YYFPSLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYFPSLabel.m; sourceTree = "<group>"; };
+		897281C2209C926D001799A9 /* YYWeakProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YYWeakProxy.h; sourceTree = "<group>"; };
+		897281C3209C926D001799A9 /* YYWeakProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYWeakProxy.m; sourceTree = "<group>"; };
 		A0DF4180EF91D6CD7F45799D /* Pods-XMNetworkingDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMNetworkingDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-XMNetworkingDemo/Pods-XMNetworkingDemo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -138,6 +144,7 @@
 		4BF800CC1DFED15C00999C54 /* XMNetworkingDemo */ = {
 			isa = PBXGroup;
 			children = (
+				897281BF209C926D001799A9 /* YYFPSLabel */,
 				4BF800D01DFED15C00999C54 /* AppDelegate.h */,
 				4BF800D11DFED15C00999C54 /* AppDelegate.m */,
 				4B16DFA5208B7E4B00BF7AC5 /* NetworkManager.h */,
@@ -199,6 +206,17 @@
 			);
 			name = XMNetworking;
 			path = ../XMNetworking;
+			sourceTree = "<group>";
+		};
+		897281BF209C926D001799A9 /* YYFPSLabel */ = {
+			isa = PBXGroup;
+			children = (
+				897281C0209C926D001799A9 /* YYFPSLabel.h */,
+				897281C1209C926D001799A9 /* YYFPSLabel.m */,
+				897281C2209C926D001799A9 /* YYWeakProxy.h */,
+				897281C3209C926D001799A9 /* YYWeakProxy.m */,
+			);
+			path = YYFPSLabel;
 			sourceTree = "<group>";
 		};
 		F4ADCB8B8390E1D937ED91BE /* Frameworks */ = {
@@ -339,10 +357,12 @@
 				4BF801101DFED40000999C54 /* XMRequest.m in Sources */,
 				4BF801131DFED44300999C54 /* XMCenter.m in Sources */,
 				4B16DFB0208C94E500BF7AC5 /* SearchViewController.m in Sources */,
+				897281C4209C926D001799A9 /* YYFPSLabel.m in Sources */,
 				4B16DFAA208B7FFB00BF7AC5 /* TipSetTableViewCell.m in Sources */,
 				4BF800D21DFED15C00999C54 /* AppDelegate.m in Sources */,
 				4B16DFAD208B89F100BF7AC5 /* TipSetItemModel.m in Sources */,
 				4BD09BC62087A789003591F4 /* MainViewController.m in Sources */,
+				897281C5209C926D001799A9 /* YYWeakProxy.m in Sources */,
 				4BF800CF1DFED15C00999C54 /* main.m in Sources */,
 				4BF801161DFED49500999C54 /* XMEngine.m in Sources */,
 				4B16DFA7208B7E4B00BF7AC5 /* NetworkManager.m in Sources */,

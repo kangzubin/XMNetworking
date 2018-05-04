@@ -9,6 +9,10 @@
 #import "AppDelegate.h"
 #import "MainViewController.h"
 
+#ifdef DEBUG
+#import "YYFPSLabel.h"
+#endif
+
 @interface AppDelegate ()
 
 @end
@@ -24,6 +28,12 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = rootNavigationController;
     [self.window makeKeyAndVisible];
+    
+#ifdef DEBUG
+    YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] init];
+    [self.window addSubview:fpsLabel];
+    fpsLabel.center = self.window.center;
+#endif
     
     return YES;
 }
