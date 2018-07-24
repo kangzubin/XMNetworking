@@ -159,7 +159,8 @@
     if (request.requestCachePolicy == XMRequestCacheIgnoreCache) {
         [self xm_sendRequest:request];
     } else {
-        id cache = [XMCache getRequestCacheByUrl:request.url];
+        NSString *cacheKey = [NSString stringWithFormat:@"%@%@",request.url,request.parameters];
+        id cache = [XMCache getRequestCacheByUrl:cacheKey];
         if (cache != nil) {
             if (request.successBlock) {
                 XM_SAFE_BLOCK(request.successBlock,cache);
@@ -640,22 +641,23 @@
 }
 
 - (void)cacheResponseByRequest:(XMRequest *)request response:(id)responseObj {
+    NSString *cacheKey = [NSString stringWithFormat:@"%@%@",request.url,request.parameters];
     switch (request.responseCachePolicy) {
         case XMResponseCacheNotCache:
             break;
         case XMResponseCacheCacheOnMemory:
         {
-            [XMCache cacheDataInMemory:responseObj withKey:request.url];
+            [XMCache cacheDataInMemory:responseObj withKey:cacheKey];
         }
             break;
         case XMResponseCacheCacheOnDisk:
         {
-            [XMCache cacheDataInDisk:responseObj withKey:request.url];
+            [XMCache cacheDataInDisk:responseObj withKey:cacheKey];
         }
             break;
         case XMResponseCacheCacheOnMemoryAndDisk:
         {
-            [XMCache cacheDataInMemoryAndDisk:responseObj withKey:request.url];
+            [XMCache cacheDataInMemoryAndDisk:responseObj withKey:cacheKey];
         }
             break;
     }
