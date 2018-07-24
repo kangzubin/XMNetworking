@@ -9,6 +9,7 @@
 #import "XMCenter.h"
 #import "XMRequest.h"
 #import "XMEngine.h"
+#import "XMCache.h"
 
 @interface XMCenter () {
     dispatch_semaphore_t _lock;
@@ -149,9 +150,30 @@
     XM_SAFE_BLOCK(configBlock, request);
     
     [self xm_processRequest:request onProgress:progressBlock onSuccess:successBlock onFailure:failureBlock onFinished:finishedBlock];
-    [self xm_sendRequest:request];
+    [self xm_sendRequestWithCachePolicy:request];
     
     return request.identifier;
+}
+
+- (void)xm_sendRequestWithCachePolicy:(XMRequest *)request {
+    if (request.requestCachePolicy == XMRequestCacheIgnoreCache) {
+        [self xm_sendRequest:request];
+    } else {
+        NSString *cacheKey = [NSString stringWithFormat:@"%@%@",request.url,request.parameters];
+        id cache = [XMCache getRequestCacheByUrl:cacheKey];
+        if (cache != nil) {
+            if (request.successBlock) {
+                XM_SAFE_BLOCK(request.successBlock,cache);
+            }
+            if (request.finishedBlock) {
+                XM_SAFE_BLOCK(request.finishedBlock,cache,nil);
+            }
+        }
+        if ((request.requestCachePolicy == XMRequestCacheCacheFirst && cache == nil) ||
+            request.requestCachePolicy == XMRequestCacheCacheReload) {
+            [self xm_sendRequest:request];
+        }
+    }
 }
 
 - (NSString *)sendBatchRequest:(XMBatchRequestConfigBlock)configBlock
@@ -526,6 +548,7 @@
             [self xm_failureWithError:error forRequest:request];
         } else {
             [self xm_successWithResponse:responseObject forRequest:request];
+            [self cacheResponseByRequest:request response:responseObject];
         }
     }];
 }
@@ -615,6 +638,29 @@
     identifier = [NSString stringWithFormat:@"BC%lu", (unsigned long)self.autoIncrement];
     XMUnlock();
     return identifier;
+}
+
+- (void)cacheResponseByRequest:(XMRequest *)request response:(id)responseObj {
+    NSString *cacheKey = [NSString stringWithFormat:@"%@%@",request.url,request.parameters];
+    switch (request.responseCachePolicy) {
+        case XMResponseCacheNotCache:
+            break;
+        case XMResponseCacheCacheOnMemory:
+        {
+            [XMCache cacheDataInMemory:responseObj withKey:cacheKey];
+        }
+            break;
+        case XMResponseCacheCacheOnDisk:
+        {
+            [XMCache cacheDataInDisk:responseObj withKey:cacheKey];
+        }
+            break;
+        case XMResponseCacheCacheOnMemoryAndDisk:
+        {
+            [XMCache cacheDataInMemoryAndDisk:responseObj withKey:cacheKey];
+        }
+            break;
+    }
 }
 
 #pragma mark - Accessor

@@ -79,6 +79,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) XMResponseSerializerType responseSerializerType;
 
 /**
+ cache policy for request, `XMRequestCacheIgnoreCache` by default, see `XMRequestCachePolicy` enum for details.
+ */
+@property (nonatomic, assign) XMRequestCachePolicy requestCachePolicy;
+
+/**
+ cache policy for response, `XMResponseCacheNotCache` by default, see `XMResponseCachePolicy` enum for details.
+ */
+@property (nonatomic, assign) XMResponseCachePolicy responseCachePolicy;
+
+/**
  Timeout interval for request, `60` seconds by default.
  */
 @property (nonatomic, assign) NSTimeInterval timeoutInterval;

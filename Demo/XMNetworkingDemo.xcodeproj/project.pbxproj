@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1A45E6D82106B6F300D939EF /* XMCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A45E6D72106B6F300D939EF /* XMCache.m */; };
 		4B16DFA7208B7E4B00BF7AC5 /* NetworkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B16DFA6208B7E4B00BF7AC5 /* NetworkManager.m */; };
 		4B16DFAA208B7FFB00BF7AC5 /* TipSetTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B16DFA9208B7FFB00BF7AC5 /* TipSetTableViewCell.m */; };
 		4B16DFAD208B89F100BF7AC5 /* TipSetItemModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B16DFAC208B89F100BF7AC5 /* TipSetItemModel.m */; };
@@ -45,6 +46,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1A45E6D62106B6F300D939EF /* XMCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMCache.h; sourceTree = "<group>"; };
+		1A45E6D72106B6F300D939EF /* XMCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMCache.m; sourceTree = "<group>"; };
 		4B16DFA5208B7E4B00BF7AC5 /* NetworkManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NetworkManager.h; sourceTree = "<group>"; };
 		4B16DFA6208B7E4B00BF7AC5 /* NetworkManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NetworkManager.m; sourceTree = "<group>"; };
 		4B16DFA8208B7FFB00BF7AC5 /* TipSetTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TipSetTableViewCell.h; sourceTree = "<group>"; };
@@ -203,6 +206,8 @@
 				4BF801121DFED44300999C54 /* XMCenter.m */,
 				4BF801141DFED49500999C54 /* XMEngine.h */,
 				4BF801151DFED49500999C54 /* XMEngine.m */,
+				1A45E6D62106B6F300D939EF /* XMCache.h */,
+				1A45E6D72106B6F300D939EF /* XMCache.m */,
 			);
 			name = XMNetworking;
 			path = ../XMNetworking;
@@ -360,6 +365,7 @@
 				897281C4209C926D001799A9 /* YYFPSLabel.m in Sources */,
 				4B16DFAA208B7FFB00BF7AC5 /* TipSetTableViewCell.m in Sources */,
 				4BF800D21DFED15C00999C54 /* AppDelegate.m in Sources */,
+				1A45E6D82106B6F300D939EF /* XMCache.m in Sources */,
 				4B16DFAD208B89F100BF7AC5 /* TipSetItemModel.m in Sources */,
 				4BD09BC62087A789003591F4 /* MainViewController.m in Sources */,
 				897281C5209C926D001799A9 /* YYWeakProxy.m in Sources */,
