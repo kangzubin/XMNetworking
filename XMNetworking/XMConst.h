@@ -67,6 +67,19 @@ typedef NS_ENUM(NSInteger, XMNetworkConnectionType) {
     kXMNetworkConnectionTypeViaWiFi          = 2,
 };
 
+typedef NS_ENUM(NSInteger, XMRequestCachePolicy) {
+    XMRequestCacheIgnoreCache  = 0,  // ignore cache
+    XMRequestCacheCacheFirst   = 1,  // If the cache hits, no request is sent, otherwise the request is sent.
+    XMRequestCacheCacheReload  = 2,  // If the cache hits, callback a cache and send a new request. Once the data is received, callback again.
+};
+
+typedef NS_ENUM(NSInteger, XMResponseCachePolicy) {
+    XMResponseCacheNotCache              = 0,
+    XMResponseCacheCacheOnMemory         = 1,  
+    XMResponseCacheCacheOnDisk           = 2,
+    XMResponseCacheCacheOnMemoryAndDisk  = 3,
+};
+
 ///------------------------------
 /// @name XMRequest Config Blocks
 ///------------------------------
