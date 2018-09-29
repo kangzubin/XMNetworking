@@ -360,9 +360,16 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     
     AFURLSessionManager *sessionManager = [self xm_getSessionManager:request];
     AFHTTPRequestSerializer *requestSerializer = [self xm_getRequestSerializer:request];
-    
+	
+	NSString *httpMethod = nil;
+	NSArray *httpMethodArray = @[@"GET", @"POST", @"HEAD", @"DELETE", @"PUT", @"PATCH"];
+	if (request.httpMethod >= 0 && request.httpMethod < httpMethodArray.count) {
+		httpMethod = httpMethodArray[request.httpMethod];
+	}
+	NSAssert(httpMethod.length > 0, @"The HTTP method not found.");
+	
     __block NSError *serializationError = nil;
-    NSMutableURLRequest *urlRequest = [requestSerializer multipartFormRequestWithMethod:@"POST"
+    NSMutableURLRequest *urlRequest = [requestSerializer multipartFormRequestWithMethod:httpMethod
                                                                               URLString:request.url
                                                                              parameters:request.parameters
                                                               constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
