@@ -367,7 +367,7 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
 		httpMethod = httpMethodArray[request.httpMethod];
 	}
 	NSAssert(httpMethod.length > 0, @"The HTTP method not found.");
-	t
+	
     __block NSError *serializationError = nil;
     NSMutableURLRequest *urlRequest = [requestSerializer multipartFormRequestWithMethod:httpMethod
                                                                               URLString:request.url
