@@ -139,10 +139,10 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
 
 - (void)dealloc {
     if (_sessionManager) {
-        [_sessionManager invalidateSessionCancelingTasks:YES];
+        [_sessionManager invalidateSessionCancelingTasks:YES resetSession:YES];
     }
     if (_securitySessionManager) {
-        [_securitySessionManager invalidateSessionCancelingTasks:YES];
+        [_sessionManager invalidateSessionCancelingTasks:YES resetSession:YES];
     }
 }
 

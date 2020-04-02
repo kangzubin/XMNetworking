@@ -1,8 +1,8 @@
 source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '8.0'
+platform :ios, '10.0'
 inhibit_all_warnings!
 
 project 'XMNetworkingDemo'
 target 'XMNetworkingDemo' do
-  pod 'AFNetworking', '~> 3.2.1'
+  pod 'AFNetworking', '~> 4.0'
 end
