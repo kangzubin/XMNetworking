@@ -469,7 +469,7 @@
     }
     
     // add general parameters to the request object.
-    if (request.useGeneralParameters && self.generalParameters.count > 0) {
+    if (request.useGeneralParameters && [request.parameters isKindOfClass:[NSDictionary class]] && self.generalParameters.count > 0) {
         NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
         [parameters addEntriesFromDictionary:self.generalParameters];
         if (request.parameters.count > 0) {

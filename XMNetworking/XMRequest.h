@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The parameters for request, if `useGeneralParameters` property is `YES` (default), the `generalParameters` of XMCenter will be appended to the `parameters`.
  */
-@property (nonatomic, strong, nullable) NSDictionary<NSString *, id> *parameters;
+@property (nonatomic, strong, nullable) id parameters;
 
 /**
  The HTTP headers for request, if `useGeneralHeaders` property is `YES` (default), the `generalHeaders` of XMCenter will be appended to the `headers`.
