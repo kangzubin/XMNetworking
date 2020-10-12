@@ -115,6 +115,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, readonly, nullable) XMProgressBlock progressBlock;
 
 /**
+ Force put the Delete request parameters in the request body. Generally DELETE method parameters would be pieced together beside URL
+ */
+@property (nonatomic, assign) BOOL forcePutDeleteMethodParametersInBody;
+
+/**
  Nil out all callback blocks when a request is finished to break the potential retain cycle.
  */
 - (void)cleanCallbackBlocks;
