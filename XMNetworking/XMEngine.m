@@ -99,6 +99,7 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
 
 @property (nonatomic, strong) AFHTTPResponseSerializer *afHTTPResponseSerializer;
 @property (nonatomic, strong) AFJSONResponseSerializer *afJSONResponseSerializer;
+@property (nonatomic, strong) AFJSONRequestSerializer *afJSONDeleteParamToBodySerializer;
 @property (nonatomic, strong) AFXMLParserResponseSerializer *afXMLResponseSerializer;
 @property (nonatomic, strong) AFPropertyListResponseSerializer *afPListResponseSerializer;
 
@@ -139,10 +140,10 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
 
 - (void)dealloc {
     if (_sessionManager) {
-        [_sessionManager invalidateSessionCancelingTasks:YES];
+        [_sessionManager invalidateSessionCancelingTasks:YES resetSession:YES];
     }
     if (_securitySessionManager) {
-        [_securitySessionManager invalidateSessionCancelingTasks:YES];
+        [_sessionManager invalidateSessionCancelingTasks:YES resetSession:YES];
     }
 }
 
@@ -360,9 +361,16 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     
     AFURLSessionManager *sessionManager = [self xm_getSessionManager:request];
     AFHTTPRequestSerializer *requestSerializer = [self xm_getRequestSerializer:request];
-    
+	
+	NSString *httpMethod = nil;
+	NSArray *httpMethodArray = @[@"GET", @"POST", @"HEAD", @"DELETE", @"PUT", @"PATCH"];
+	if (request.httpMethod >= 0 && request.httpMethod < httpMethodArray.count) {
+		httpMethod = httpMethodArray[request.httpMethod];
+	}
+	NSAssert(httpMethod.length > 0, @"The HTTP method not found.");
+	
     __block NSError *serializationError = nil;
-    NSMutableURLRequest *urlRequest = [requestSerializer multipartFormRequestWithMethod:@"POST"
+    NSMutableURLRequest *urlRequest = [requestSerializer multipartFormRequestWithMethod:httpMethod
                                                                               URLString:request.url
                                                                              parameters:request.parameters
                                                               constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
@@ -528,6 +536,9 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
     if (request.requestSerializerType == kXMRequestSerializerRAW) {
         return self.afHTTPRequestSerializer;
     } else if(request.requestSerializerType == kXMRequestSerializerJSON) {
+        if (request.forcePutDeleteMethodParametersInBody) {
+            return self.afJSONDeleteParamToBodySerializer;
+        }
         return self.afJSONRequestSerializer;
     } else if (request.requestSerializerType == kXMRequestSerializerPlist) {
         return self.afPListRequestSerializer;
@@ -589,6 +600,14 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
         
     }
     return _afJSONRequestSerializer;
+}
+
+- (AFJSONRequestSerializer *)afJSONDeleteParamToBodySerializer {
+    if (!_afJSONDeleteParamToBodySerializer) {
+        _afJSONDeleteParamToBodySerializer = [AFJSONRequestSerializer serializer];
+        _afJSONDeleteParamToBodySerializer.HTTPMethodsEncodingParametersInURI = [NSSet setWithObjects:@"GET", @"HEAD", nil];
+    }
+    return _afJSONDeleteParamToBodySerializer;
 }
 
 - (AFPropertyListRequestSerializer *)afPListRequestSerializer {

@@ -1,5 +1,4 @@
-// UIKit+AFNetworking.h
-//
+// AFCompatibilityMacros.h
 // Copyright (c) 2011–2016 Alamofire Software Foundation ( http://alamofire.org/ )
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,23 +19,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#if TARGET_OS_IOS || TARGET_OS_TV
-#import <UIKit/UIKit.h>
+#ifndef AFCompatibilityMacros_h
+#define AFCompatibilityMacros_h
 
-#ifndef _UIKIT_AFNETWORKING_
-    #define _UIKIT_AFNETWORKING_
+#ifdef API_AVAILABLE
+    #define AF_API_AVAILABLE(...) API_AVAILABLE(__VA_ARGS__)
+#else
+    #define AF_API_AVAILABLE(...)
+#endif // API_AVAILABLE
 
-#if TARGET_OS_IOS
-    #import "AFAutoPurgingImageCache.h"
-    #import "AFImageDownloader.h"
-    #import "AFNetworkActivityIndicatorManager.h"
-    #import "UIRefreshControl+AFNetworking.h"
-    #import "WKWebView+AFNetworking.h"
+#ifdef API_UNAVAILABLE
+    #define AF_API_UNAVAILABLE(...) API_UNAVAILABLE(__VA_ARGS__)
+#else
+    #define AF_API_UNAVAILABLE(...)
+#endif // API_UNAVAILABLE
+
+#if __has_warning("-Wunguarded-availability-new")
+    #define AF_CAN_USE_AT_AVAILABLE 1
+#else
+    #define AF_CAN_USE_AT_AVAILABLE 0
 #endif
 
-    #import "UIActivityIndicatorView+AFNetworking.h"
-    #import "UIButton+AFNetworking.h"
-    #import "UIImageView+AFNetworking.h"
-    #import "UIProgressView+AFNetworking.h"
-#endif /* _UIKIT_AFNETWORKING_ */
+#if ((__IPHONE_OS_VERSION_MAX_ALLOWED && __IPHONE_OS_VERSION_MAX_ALLOWED < 100000) || (__MAC_OS_VERSION_MAX_ALLOWED && __MAC_OS_VERSION_MAX_ALLOWED < 101200) ||(__WATCH_OS_MAX_VERSION_ALLOWED && __WATCH_OS_MAX_VERSION_ALLOWED < 30000) ||(__TV_OS_MAX_VERSION_ALLOWED && __TV_OS_MAX_VERSION_ALLOWED < 100000))
+    #define AF_CAN_INCLUDE_SESSION_TASK_METRICS 0
+#else
+    #define AF_CAN_INCLUDE_SESSION_TASK_METRICS 1
 #endif
+
+#endif /* AFCompatibilityMacros_h */
