@@ -555,83 +555,91 @@ static OSStatus XMExtractIdentityAndTrustFromPKCS12(CFDataRef inPKCS12Data, CFSt
 #pragma mark - Accessor
 
 - (AFURLSessionManager *)sessionManager {
-    if (!_sessionManager) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _sessionManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:nil];
         _sessionManager.responseSerializer = self.afHTTPResponseSerializer;
         _sessionManager.operationQueue.maxConcurrentOperationCount = 5;
         _sessionManager.completionQueue = xm_request_completion_callback_queue();
-    }
+    });
     return _sessionManager;
 }
 
 - (AFURLSessionManager *)securitySessionManager {
-    if (!_securitySessionManager) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _securitySessionManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:nil];
         _securitySessionManager.responseSerializer = self.afHTTPResponseSerializer;
         _securitySessionManager.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
         _securitySessionManager.operationQueue.maxConcurrentOperationCount = 5;
         _securitySessionManager.completionQueue = xm_request_completion_callback_queue();
-    }
-    return _securitySessionManager;
+    });
+    return _sessionManager;
 }
 
 - (AFHTTPRequestSerializer *)afHTTPRequestSerializer {
-    if (!_afHTTPRequestSerializer) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _afHTTPRequestSerializer = [AFHTTPRequestSerializer serializer];
-        
-    }
+    });
     return _afHTTPRequestSerializer;
 }
 
 - (AFJSONRequestSerializer *)afJSONRequestSerializer {
-    if (!_afJSONRequestSerializer) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _afJSONRequestSerializer = [AFJSONRequestSerializer serializer];
-        
-    }
+    });
     return _afJSONRequestSerializer;
 }
 
 - (AFPropertyListRequestSerializer *)afPListRequestSerializer {
-    if (!_afPListRequestSerializer) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _afPListRequestSerializer = [AFPropertyListRequestSerializer serializer];
-    }
+    });
     return _afPListRequestSerializer;
 }
 
 - (AFHTTPResponseSerializer *)afHTTPResponseSerializer {
-    if (!_afHTTPResponseSerializer) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _afHTTPResponseSerializer = [AFHTTPResponseSerializer serializer];
-    }
+    });
     return _afHTTPResponseSerializer;
 }
 
 - (AFJSONResponseSerializer *)afJSONResponseSerializer {
-    if (!_afJSONResponseSerializer) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _afJSONResponseSerializer = [AFJSONResponseSerializer serializer];
         // Append more other commonly-used types to the JSON responses accepted MIME types.
-        //_afJSONResponseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", @"text/plain", nil];
-    }
+        // _afJSONResponseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", @"text/plain", nil];
+    });
     return _afJSONResponseSerializer;
 }
 
 - (AFXMLParserResponseSerializer *)afXMLResponseSerializer {
-    if (!_afXMLResponseSerializer) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _afXMLResponseSerializer = [AFXMLParserResponseSerializer serializer];
-    }
+    });
     return _afXMLResponseSerializer;
 }
 
 - (AFPropertyListResponseSerializer *)afPListResponseSerializer {
-    if (!_afPListResponseSerializer) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _afPListResponseSerializer = [AFPropertyListResponseSerializer serializer];
-    }
+    });
     return _afPListResponseSerializer;
 }
 
 - (NSMutableArray *)sslPinningHosts {
-    if (!_sslPinningHosts) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         _sslPinningHosts = [NSMutableArray array];
-    }
+    });
     return _sslPinningHosts;
 }
 
