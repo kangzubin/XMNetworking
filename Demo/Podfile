@@ -4,5 +4,5 @@ inhibit_all_warnings!
 
 project 'XMNetworkingDemo'
 target 'XMNetworkingDemo' do
-  pod 'AFNetworking', ‘>=4.0’
+  pod 'AFNetworking','~> 4.0'
 end
